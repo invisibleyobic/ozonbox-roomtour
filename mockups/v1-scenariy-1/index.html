@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>МАКЕТ · OzoneBox v1 · сценарий «промокод → заказ → канал»</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Токены - из прототипа X:/Remotion 10.06.26/ozonbox/css/catalog.css, чтобы изменения читались в его стиле */
+:root {
+  --bg: #f4f7fb; --bg-deep: #eaf0f8; --card: #fff;
+  --ink: #0d1b2e; --ink-soft: #5a6b83; --ink-mute: #8a99ad;
+  --brand: #3c6df0; --brand-deep: #2b52c4; --aqua: #12b5a6;
+  --line: rgba(13,27,46,.08); --line-soft: rgba(13,27,46,.05);
+  --shadow-rest: 0 1px 2px rgba(13,27,46,.04), 0 8px 24px rgba(13,27,46,.05);
+  --shadow-lift: 0 2px 4px rgba(13,27,46,.05), 0 24px 60px rgba(13,27,46,.13);
+  --ease-out: cubic-bezier(.16,1,.3,1);
+  --radius: 20px;
+  --mock-bg: #fff4d6; --mock-ink: #7a4f00; --mock-line: #f0c96a;
+  --err: #d7433a; --err-bg: #fdecea; --ok: #0e8f7e; --ok-bg: #e3f6f3;
+  --new: #7b4dff;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; font-size: 15px; line-height: 1.5; }
+button, input, select { font-family: inherit; font-size: inherit; }
+.wrap { max-width: 1320px; margin: 0 auto; padding: 0 28px; }
+a { color: var(--brand); }
+code { font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; font-size: .88em; background: var(--bg-deep); padding: 1px 6px; border-radius: 6px; }
+
+/* ---------- Полоса «это макет» ---------- */
+.mockbar { position: sticky; top: 0; z-index: 80; background: var(--mock-bg); border-bottom: 1px solid var(--mock-line); color: var(--mock-ink); font-size: 13.5px; }
+.mockbar .wrap { display: flex; align-items: center; gap: 16px; min-height: 46px; flex-wrap: wrap; padding-top: 6px; padding-bottom: 6px; }
+.mockbar b { letter-spacing: .08em; }
+.mockbar .spacer { flex: 1; }
+.toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; font-weight: 600; }
+.toggle input { accent-color: var(--new); width: 16px; height: 16px; }
+.tag-mock { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; background: var(--mock-bg); color: var(--mock-ink); border: 1px dashed var(--mock-line); padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+.warn { color: var(--mock-ink); background: var(--mock-bg); border-radius: 5px; padding: 0 5px; font-weight: 600; font-size: .92em; white-space: nowrap; }
+
+/* ---------- Вступление ---------- */
+.intro { padding: 44px 0 20px; }
+.eyebrow { display: inline-flex; align-items: center; gap: 9px; font-size: 12px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--brand); background: rgba(60,109,240,.08); padding: 7px 14px; border-radius: 100px; margin-bottom: 18px; }
+.eyebrow i { width: 6px; height: 6px; border-radius: 50%; background: var(--aqua); display: block; }
+h1 { font-size: clamp(28px, 4vw, 46px); line-height: 1.08; letter-spacing: -.03em; font-weight: 600; margin: 0 0 14px; max-width: 24ch; }
+h1 em { font-style: normal; color: var(--brand); }
+.lead { color: var(--ink-soft); max-width: 72ch; margin: 0 0 8px; font-size: 16px; }
+.src { color: var(--ink-mute); font-size: 13px; margin: 0; }
+
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 26px 0 8px; }
+.cmp-card { background: var(--card); border: 1px solid var(--line-soft); border-radius: var(--radius); box-shadow: var(--shadow-rest); padding: 22px 24px; }
+.cmp-card h3 { margin: 0 0 12px; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; }
+.cmp-card.was h3 { color: var(--ink-mute); }
+.cmp-card.will h3 { color: var(--brand); }
+.cmp-card ul { margin: 0; padding-left: 18px; }
+.cmp-card li { margin-bottom: 7px; }
+.cmp-card li small { color: var(--ink-mute); }
+
+/* ---------- Шаги ---------- */
+.steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin: 26px 0 16px; }
+.step-btn { appearance: none; border: 1px solid var(--line); background: var(--card); border-radius: 14px; padding: 10px 12px; text-align: left; cursor: pointer; transition: all .35s var(--ease-out); color: var(--ink-soft); min-width: 0; }
+.step-btn:hover { border-color: rgba(60,109,240,.4); transform: translateY(-1px); }
+.step-btn .n { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); display: block; }
+.step-btn .t { font-weight: 600; font-size: 14px; color: var(--ink); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.step-btn .w { font-size: 12px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.step-btn.is-on { background: var(--ink); border-color: var(--ink); }
+.step-btn.is-on .t { color: #fff; } .step-btn.is-on .n, .step-btn.is-on .w { color: rgba(255,255,255,.6); }
+.step-btn.is-done .n::after { content: ' ✓'; color: var(--aqua); }
+
+/* ---------- Сцена: экран + пояснения ---------- */
+.stage { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(300px, 1fr); gap: 22px; align-items: start; padding-bottom: 30px; }
+.phases { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
+.ph-btn { appearance: none; border: 1px solid var(--line); background: var(--card); padding: 8px 14px; border-radius: 100px; cursor: pointer; font-weight: 500; font-size: 13.5px; color: var(--ink-soft); transition: all .3s var(--ease-out); }
+.ph-btn:hover { color: var(--brand); border-color: rgba(60,109,240,.4); }
+.ph-btn.is-on { background: var(--brand); border-color: var(--brand); color: #fff; }
+.ph-btn.err.is-on { background: var(--err); border-color: var(--err); }
+.ph-sep { color: var(--ink-mute); font-size: 12px; }
+.variants { display: flex; gap: 6px; flex-wrap: wrap; margin: -4px 0 12px; }
+.var-btn { appearance: none; border: 1px dashed rgba(215,67,58,.45); background: var(--err-bg); color: var(--err); padding: 5px 11px; border-radius: 8px; cursor: pointer; font-size: 12.5px; font-weight: 600; }
+.var-btn.is-on { background: var(--err); color: #fff; border-style: solid; }
+.dev-switch { margin-left: auto; display: inline-flex; border: 1px solid var(--line); border-radius: 100px; overflow: hidden; background: var(--card); }
+.dev-switch button { appearance: none; border: 0; background: transparent; padding: 7px 12px; cursor: pointer; font-size: 12.5px; color: var(--ink-soft); }
+.dev-switch button.is-on { background: var(--bg-deep); color: var(--ink); font-weight: 600; }
+
+/* Рамки устройств */
+.device { background: var(--card); border-radius: 18px; box-shadow: var(--shadow-lift); overflow: hidden; border: 1px solid var(--line); margin: 0 auto; transition: max-width .5s var(--ease-out); }
+.device.is-phone { max-width: 400px; border-radius: 30px; border: 8px solid #10151f; }
+.browser-bar { display: flex; align-items: center; gap: 8px; padding: 9px 12px; background: #eef2f8; border-bottom: 1px solid var(--line); }
+.browser-bar .dots { display: flex; gap: 5px; } .browser-bar .dots i { width: 9px; height: 9px; border-radius: 50%; background: #cfd7e3; display: block; }
+.browser-bar .url { flex: 1; min-width: 0; background: #fff; border-radius: 8px; padding: 5px 10px; font-size: 12px; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.browser-bar .url b { color: var(--ink); font-weight: 600; }
+.is-phone .browser-bar .dots { display: none; }
+.screen { position: relative; min-height: 560px; }
+.screen .corner { position: absolute; top: 10px; right: 10px; z-index: 30; }
+
+/* Шапка сайта (как в прототипе) */
+.site-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--line); background: rgba(244,247,251,.94); position: relative; z-index: 5; }
+.logo { display: flex; align-items: center; gap: 9px; }
+.logo svg { width: 24px; height: 24px; }
+.logo-word { font-size: 16px; font-weight: 600; letter-spacing: -.02em; } .logo-word span { color: var(--brand); }
+.head-nav { display: flex; gap: 16px; font-size: 13.5px; color: var(--ink-soft); }
+.is-phone .head-nav { display: none; }
+.cart-btn { appearance: none; border: 1px solid var(--line); background: var(--card); border-radius: 100px; padding: 7px 14px; cursor: pointer; font-weight: 600; font-size: 13px; display: inline-flex; gap: 8px; align-items: center; }
+.cart-btn .cnt { background: var(--ink); color: #fff; border-radius: 100px; min-width: 20px; height: 20px; font-size: 11.5px; display: inline-flex; align-items: center; justify-content: center; padding: 0 6px; }
+.cart-btn.bump .cnt { animation: bump .6s var(--ease-out); background: var(--brand); }
+@keyframes bump { 0% { transform: scale(1); } 35% { transform: scale(1.45); } 100% { transform: scale(1); } }
+
+/* Плашка с кодом (новое) */
+.promo-strip { display: flex; align-items: center; gap: 10px; padding: 9px 18px; background: rgba(18,181,166,.1); color: #0b6f64; font-size: 13px; font-weight: 500; }
+.promo-strip b { font-weight: 700; letter-spacing: .03em; }
+
+/* Осенняя сцена */
+.scene-scroll { height: 520px; overflow-y: auto; position: relative; overscroll-behavior: contain; }
+.is-phone .scene-scroll { height: 560px; }
+.scene-track { height: 1700px; position: relative; }
+.scene { position: sticky; top: 0; height: 520px; overflow: hidden; color: #fff; }
+.is-phone .scene { height: 560px; }
+.scene-bg { position: absolute; inset: -20% -10%; background: radial-gradient(60% 50% at calc(30% + var(--p) * 40%) 30%, rgba(233,179,95,.55), transparent 70%), radial-gradient(50% 45% at 80% calc(80% - var(--p) * 40%), rgba(60,109,240,.35), transparent 70%), linear-gradient(160deg, #2a1d16 0%, #4b2616 38%, #7a3b16 70%, #24252b 100%); transform: scale(calc(1 + var(--p) * .18)) translateY(calc(var(--p) * -6%)); transition: transform .1s linear; }
+.scene.no-video .scene-bg { background: linear-gradient(160deg, #3a2a20 0%, #5a3a26 60%, #2d2f36 100%); transform: none; }
+.leaf { position: absolute; border-radius: 60% 0 60% 0; background: linear-gradient(135deg, #e9a24a, #b6531d); opacity: .55; filter: blur(.5px); }
+.scene-text { position: absolute; left: 28px; right: 28px; top: 34px; z-index: 3; max-width: 520px; transition: opacity .3s, transform .3s; }
+.scene-text .kicker { font-size: 11.5px; letter-spacing: .16em; text-transform: uppercase; opacity: .8; font-weight: 600; }
+.scene-text h2 { font-size: clamp(24px, 3.2vw, 36px); line-height: 1.1; letter-spacing: -.02em; margin: 10px 0 10px; font-weight: 600; }
+.scene-text p { margin: 0; opacity: .85; font-size: 14.5px; max-width: 44ch; }
+.scene-products { position: absolute; left: 20px; right: 20px; bottom: 20px; z-index: 3; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.is-phone .scene-products { grid-template-columns: repeat(2, 1fr); }
+.sp { background: rgba(255,255,255,.96); color: var(--ink); border-radius: 14px; padding: 10px; opacity: 0; transform: translateY(26px); transition: opacity .5s var(--ease-out), transform .5s var(--ease-out); display: flex; flex-direction: column; }
+.sp.in { opacity: 1; transform: none; }
+.sp img { width: 100%; height: 74px; object-fit: contain; }
+.sp .nm { font-size: 12.5px; font-weight: 600; line-height: 1.25; margin: 6px 0 4px; flex: 1; }
+.sp .pr { font-size: 15px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.sp button { margin-top: 6px; }
+.scene-hint { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 4; background: rgba(13,27,46,.55); border-radius: 100px; padding: 8px 16px; font-size: 13px; backdrop-filter: blur(6px); transition: opacity .4s; }
+.progress { position: absolute; right: 10px; top: 60px; bottom: 60px; width: 3px; background: rgba(255,255,255,.2); border-radius: 3px; z-index: 4; }
+.progress i { display: block; width: 100%; background: #fff; border-radius: 3px; height: calc(var(--p) * 100%); }
+.video-note { position: absolute; left: 20px; bottom: auto; top: 12px; right: auto; z-index: 6; }
+.skeleton { position: absolute; inset: 0; z-index: 5; background: linear-gradient(100deg, rgba(255,255,255,0) 30%, rgba(255,255,255,.12) 50%, rgba(255,255,255,0) 70%) #3a2a20; background-size: 200% 100%; animation: shimmer 1.4s linear infinite; display: flex; align-items: center; justify-content: center; font-size: 13.5px; color: rgba(255,255,255,.85); }
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* Каталог внутри экрана (в стиле карточек прототипа) */
+.catalog { padding: 22px 18px 26px; background: var(--bg); }
+.catalog h3 { margin: 0 0 4px; font-size: 20px; letter-spacing: -.02em; }
+.catalog .sub { color: var(--ink-mute); font-size: 13px; margin: 0 0 14px; }
+.filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.filter { appearance: none; border: 1px solid var(--line); background: var(--card); padding: 7px 14px; border-radius: 100px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--ink-soft); }
+.filter.is-on { background: var(--ink); border-color: var(--ink); color: #fff; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.card { background: var(--card); border-radius: 16px; border: 1px solid var(--line-soft); box-shadow: var(--shadow-rest); overflow: hidden; display: flex; flex-direction: column; }
+.card-media { aspect-ratio: 4/3; background: linear-gradient(160deg, #f8fafd, #eef3fa); }
+.card-media img { width: 100%; height: 100%; object-fit: contain; padding: 10px; }
+.card-body { padding: 10px 12px 12px; display: flex; flex-direction: column; flex: 1; }
+.card-name { font-size: 13px; font-weight: 600; line-height: 1.3; margin: 0 0 8px; flex: 1; }
+.price { font-size: 17px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.btn { appearance: none; cursor: pointer; border-radius: 11px; font-weight: 600; font-size: 13.5px; border: none; padding: 10px 14px; transition: all .3s var(--ease-out); display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-buy { background: var(--ink); color: #fff; }
+.btn-buy:hover { background: var(--brand); }
+.btn-buy:disabled { background: #b9c3d2; cursor: not-allowed; }
+.btn-sm { padding: 7px 10px; font-size: 12.5px; border-radius: 9px; }
+.btn-ghost { background: transparent; border: 1px solid var(--line); color: var(--ink); }
+.btn-ghost:hover { border-color: var(--brand); color: var(--brand); }
+.btn-brand { background: var(--brand); color: #fff; } .btn-brand:hover { background: var(--brand-deep); }
+
+/* Корзина и оформление */
+.panel { padding: 22px 22px 26px; }
+.panel h3 { margin: 0 0 14px; font-size: 21px; letter-spacing: -.02em; }
+.line-item { display: grid; grid-template-columns: 60px 1fr auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line-soft); }
+.line-item img { width: 60px; height: 50px; object-fit: contain; background: #f4f7fb; border-radius: 10px; padding: 4px; }
+.line-item .nm { font-weight: 600; font-size: 14px; line-height: 1.3; }
+.line-item .qty { font-size: 12.5px; color: var(--ink-mute); }
+.promo-box { margin: 16px 0 6px; padding: 14px; border-radius: 14px; background: var(--bg); border: 1px solid var(--line-soft); }
+.promo-box label { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); display: block; margin-bottom: 8px; }
+.promo-row { display: flex; gap: 8px; }
+.inp { flex: 1; min-width: 0; border: 1px solid var(--line); background: #fff; border-radius: 11px; padding: 10px 12px; outline: none; transition: border-color .2s; }
+.inp:focus { border-color: var(--brand); }
+.inp.bad { border-color: var(--err); background: #fffafa; }
+.msg { margin-top: 10px; font-size: 13.5px; padding: 9px 12px; border-radius: 10px; }
+.msg.ok { background: var(--ok-bg); color: var(--ok); }
+.msg.err { background: var(--err-bg); color: var(--err); }
+.msg.info { background: #eef3ff; color: var(--brand-deep); }
+.src-badge { display: inline-flex; gap: 6px; align-items: center; font-size: 12.5px; font-weight: 600; background: rgba(18,181,166,.12); color: #0b6f64; padding: 4px 10px; border-radius: 100px; margin-top: 8px; }
+.totals { margin-top: 14px; }
+.totals .row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 14px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.totals .row.sum { color: var(--ink); font-weight: 700; font-size: 18px; border-top: 1px solid var(--line); margin-top: 6px; padding-top: 10px; }
+.totals .disc { color: var(--err); }
+.spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(60,109,240,.25); border-top-color: var(--brand); animation: spin .8s linear infinite; display: inline-block; vertical-align: -3px; }
+.spinner.light { border-color: rgba(255,255,255,.3); border-top-color: #fff; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.is-phone .form-grid { grid-template-columns: 1fr; }
+.field label { display: block; font-size: 12.5px; color: var(--ink-soft); margin-bottom: 4px; font-weight: 500; }
+.field .inp { width: 100%; }
+.field .hint { font-size: 12px; color: var(--err); margin-top: 3px; }
+.choice { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; margin-top: 8px; cursor: pointer; background: #fff; }
+.choice input { margin-top: 3px; accent-color: var(--brand); }
+.choice.bad { border-color: var(--err); background: #fffafa; }
+.choice small { color: var(--ink-mute); display: block; }
+.sec-title { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin: 18px 0 4px; }
+
+/* Окно оплаты (имитация) */
+.veil { position: absolute; inset: 0; background: rgba(13,27,46,.5); z-index: 20; display: flex; align-items: center; justify-content: center; padding: 18px; }
+.paywin { background: #fff; border-radius: 18px; width: min(380px, 100%); padding: 20px; box-shadow: var(--shadow-lift); border: 2px dashed var(--mock-line); }
+.paywin h4 { margin: 8px 0 4px; font-size: 17px; }
+.paywin .amt { font-size: 28px; font-weight: 700; letter-spacing: -.02em; margin: 6px 0 12px; font-variant-numeric: tabular-nums; }
+.paywin .nocard { border: 1px dashed #c8d1de; border-radius: 12px; padding: 12px; font-size: 13px; color: var(--ink-soft); background: #f8fafd; margin-bottom: 12px; }
+.paywin .sim { display: grid; gap: 8px; }
+
+/* Мессенджеры (имитация) */
+.chat { background: #eef1f5; min-height: 560px; display: flex; flex-direction: column; }
+.chat-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: #fff; border-bottom: 1px solid var(--line); }
+.chat-head .ava { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #3c6df0, #12b5a6); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; }
+.chat-head .who { font-weight: 600; font-size: 14px; line-height: 1.2; } .chat-head .who small { display: block; color: var(--ink-mute); font-weight: 400; font-size: 12px; }
+.chat-body { flex: 1; padding: 14px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
+.bubble { max-width: 82%; padding: 9px 12px; border-radius: 16px; font-size: 14px; line-height: 1.45; background: #fff; box-shadow: 0 1px 1px rgba(0,0,0,.04); }
+.bubble.me { align-self: flex-end; background: var(--brand); color: #fff; border-bottom-right-radius: 6px; }
+.bubble.them { align-self: flex-start; border-bottom-left-radius: 6px; }
+.bubble .meta { display: block; font-size: 11px; opacity: .65; margin-top: 3px; text-align: right; }
+.bubble.bot { font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; font-size: 13px; white-space: pre-wrap; }
+.typing { align-self: flex-start; background: #fff; border-radius: 16px; padding: 10px 14px; display: flex; gap: 4px; }
+.typing i { width: 7px; height: 7px; border-radius: 50%; background: #aab4c3; animation: blink 1.2s infinite; display: block; }
+.typing i:nth-child(2) { animation-delay: .2s; } .typing i:nth-child(3) { animation-delay: .4s; }
+@keyframes blink { 0%, 80%, 100% { opacity: .3; } 40% { opacity: 1; } }
+.chat-foot { display: flex; gap: 8px; padding: 10px; background: #fff; border-top: 1px solid var(--line); }
+.reel { align-self: center; width: 78%; aspect-ratio: 9/12; border-radius: 16px; position: relative; overflow: hidden; color: #fff; background: radial-gradient(60% 50% at 40% 30%, rgba(233,179,95,.6), transparent 70%), linear-gradient(170deg, #2a1d16, #7a3b16 70%, #24252b); display: flex; flex-direction: column; justify-content: flex-end; padding: 14px; }
+.reel.small { width: 46%; aspect-ratio: 9/10; font-size: 11px; }
+.reel .cap { font-size: 14px; font-weight: 600; line-height: 1.3; }
+.reel.small .cap { font-size: 11.5px; }
+.reel .cap-sub { font-size: 12px; opacity: .85; margin-top: 4px; }
+.sys-note { align-self: center; font-size: 12px; color: var(--ink-mute); background: rgba(255,255,255,.7); padding: 4px 10px; border-radius: 100px; text-align: center; }
+
+/* Итоговый экран: три колонки */
+.result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.result-grid > div { min-width: 0; }
+.result-grid .col-title { font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-mute); padding: 12px 16px 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.thanks { padding: 16px; }
+.thanks .big { font-size: 22px; font-weight: 600; letter-spacing: -.02em; margin: 6px 0; }
+.db { grid-column: 1 / -1; border-top: 1px solid var(--line); }
+.db-wrap { overflow-x: auto; padding: 8px 16px 16px; }
+table.db-t { border-collapse: collapse; font-size: 12.5px; min-width: 620px; width: 100%; font-variant-numeric: tabular-nums; }
+.db-t th, .db-t td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--line-soft); white-space: nowrap; }
+.db-t th { color: var(--ink-mute); font-weight: 600; font-family: ui-monospace, Consolas, monospace; font-size: 11.5px; }
+.db-t td.pd { color: var(--ink-mute); font-style: italic; }
+.pill { display: inline-block; padding: 2px 8px; border-radius: 100px; font-size: 11.5px; font-weight: 700; }
+.pill.paid { background: var(--ok-bg); color: var(--ok); } .pill.wait { background: #eef3ff; color: var(--brand-deep); } .pill.bad { background: var(--err-bg); color: var(--err); }
+.tg-wrap .chat { min-height: 260px; }
+
+/* Пояснения справа */
+.explain { position: sticky; top: 62px; }
+.ex-card { background: var(--card); border: 1px solid var(--line-soft); border-radius: var(--radius); box-shadow: var(--shadow-rest); padding: 20px 22px; }
+.ex-card h2 { font-size: 20px; letter-spacing: -.02em; margin: 2px 0 14px; line-height: 1.2; }
+.ex-card .stepno { font-size: 11.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--brand); }
+.ex-card dl { margin: 0; }
+.ex-card dt { font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-mute); margin-top: 12px; display: flex; gap: 7px; align-items: center; }
+.ex-card dd { margin: 4px 0 0; font-size: 14px; }
+.ex-card dd.mock { background: var(--mock-bg); color: var(--mock-ink); border-radius: 10px; padding: 8px 10px; font-size: 13.5px; }
+.ex-card dd.rule { font-size: 12.5px; color: var(--ink-soft); }
+.now { margin-top: 16px; padding: 12px 14px; border-radius: 12px; background: #eef3ff; font-size: 14px; }
+.now.err { background: var(--err-bg); color: #8f2a23; }
+.now b { display: block; font-size: 11.5px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 3px; }
+.ex-nav { display: flex; gap: 8px; margin-top: 16px; }
+.ex-nav .btn { flex: 1; }
+
+/* Решения и «потом» */
+.block { padding: 34px 0 10px; }
+.block h2 { font-size: 26px; letter-spacing: -.02em; margin: 0 0 6px; }
+.block > .wrap > p { color: var(--ink-soft); margin: 0 0 18px; max-width: 80ch; }
+.decisions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.dec { background: var(--card); border: 1px solid var(--line-soft); border-radius: var(--radius); box-shadow: var(--shadow-rest); padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; }
+.dec h3 { margin: 0; font-size: 16px; line-height: 1.3; }
+.dec .opt { border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; cursor: pointer; transition: all .25s var(--ease-out); font-size: 13.5px; }
+.dec .opt:hover { border-color: rgba(60,109,240,.45); }
+.dec .opt.is-on { border-color: var(--brand); background: rgba(60,109,240,.06); box-shadow: 0 0 0 1px var(--brand) inset; }
+.dec .opt b { display: block; font-size: 14px; margin-bottom: 2px; }
+.dec .opt .rec { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--aqua); }
+.dec .why { font-size: 12.5px; color: var(--ink-soft); }
+.answer { margin-top: 16px; background: var(--ink); color: #fff; border-radius: 14px; padding: 14px 18px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; font-size: 14px; }
+.answer code { background: rgba(255,255,255,.12); color: #fff; font-size: 14px; padding: 4px 10px; }
+.owner-q { margin-top: 16px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.owner-q div { background: var(--mock-bg); color: var(--mock-ink); border-radius: 14px; padding: 12px 14px; font-size: 13.5px; }
+.owner-q b { display: block; margin-bottom: 3px; }
+.later { display: flex; flex-wrap: wrap; gap: 8px; }
+.later span { background: var(--card); border: 1px solid var(--line); border-radius: 100px; padding: 7px 14px; font-size: 13px; color: var(--ink-soft); }
+footer { padding: 30px 0 60px; color: var(--ink-mute); font-size: 13px; }
+footer code { background: transparent; padding: 0; }
+
+/* Подсветка нового */
+.hl [data-new] { outline: 2px dashed var(--new); outline-offset: 3px; position: relative; }
+.hl [data-new]::before { content: attr(data-new); position: absolute; top: -11px; left: 8px; z-index: 40; background: var(--new); color: #fff; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; white-space: nowrap; font-family: 'Manrope', sans-serif; font-style: normal; }
+
+@media (max-width: 1060px) {
+  .stage { grid-template-columns: 1fr; }
+  .explain { position: static; }
+  .decisions { grid-template-columns: 1fr; }
+  .owner-q { grid-template-columns: 1fr 1fr; }
+  .steps { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 700px) {
+  .wrap { padding: 0 16px; }
+  .compare { grid-template-columns: 1fr; }
+  .steps { grid-template-columns: repeat(2, 1fr); }
+  .scene-products { grid-template-columns: repeat(2, 1fr); }
+  .result-grid { grid-template-columns: 1fr; }
+  .owner-q { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+</style>
+</head>
+<body>
+
+<div class="mockbar">
+  <div class="wrap">
+    <span class="tag-mock">Макет</span>
+    <span><b>Это не сайт.</b> Оплаты, базы, бота и отправки сообщений здесь нет. Все имена, номера и суммы - примеры. Жёлтым помечены имитации и то, что ещё не решено.</span>
+    <span class="spacer"></span>
+    <label class="toggle"><input type="checkbox" id="hlToggle"> Подсветить новое и изменённое</label>
+  </div>
+</div>
+
+<section class="intro">
+  <div class="wrap">
+    <div class="eyebrow"><i></i>Первая версия · сценарий 1 из idea/proof-of-value.md</div>
+    <h1>Промокод из ролика → оплаченный заказ → <em>видно канал</em></h1>
+    <p class="lead">Шесть шагов первого сквозного сценария. У каждого шага пять состояний: до действия, ввод, ожидание, результат и ошибка. Экран слева можно нажимать, справа - кто действует, что происходит и где остаётся результат.</p>
+    <p class="src">Основа: <code>idea/mvp.md</code>, <code>idea/proof-of-value.md</code>, <code>idea/principles.md</code>, <code>architecture/00-правила-проекта.md</code>, <code>architecture/README.md</code>. Файлы чертежа 01-10 пока черновики: всего, чего нет в замысле, в макете помечено как предложение. Стиль - из прототипа каталога (<code>X:/Remotion 10.06.26/ozonbox</code>).</p>
+
+    <div class="compare">
+      <div class="cmp-card was">
+        <h3>Как было - сегодня</h3>
+        <ul>
+          <li>Человек видит пост и идёт на сайт Tilda или на Wildberries и Ozon. <small>(idea/pitch.md)</small></li>
+          <li>Сайт на Tilda почти не продаёт, на главной до сих пор заглушка шаблона.</li>
+          <li>Заказ приходит, но никто не знает, какой канал его привёл. Решения принимаются наугад.</li>
+          <li>На всех товарах постоянные «зачёркнутые» цены, в текстах «лечит» и «результат за 21 день». Это риск по закону о рекламе. <small>(.business: pricing, content)</small></li>
+        </ul>
+      </div>
+      <div class="cmp-card will">
+        <h3>Как будет - первая версия</h3>
+        <ul>
+          <li>У каждого ролика свой промокод. Ссылка из директа сама подставляет код.</li>
+          <li>Новый сайт на тестовом адресе: осенняя сцена-тур и весь каталог из 19 товаров. Tilda пока работает.</li>
+          <li>Своя корзина → CloudPayments → заказ в базе на сервере в РФ.</li>
+          <li>Через минуту в Telegram приходят сумма, набор, код и канал, без личных данных покупателя.</li>
+          <li>Цены без фальшивых скидок, тексты без медицинских обещаний. <small>(00-правила, «Запрещено»)</small></li>
+        </ul>
+      </div>
+    </div>
+
+    <nav class="steps" id="steps" aria-label="Шаги сценария"></nav>
+  </div>
+</section>
+
+<section>
+  <div class="wrap stage">
+    <div>
+      <div class="phases" id="phases"></div>
+      <div class="variants" id="variants"></div>
+      <div class="device" id="device"></div>
+    </div>
+    <aside class="explain" id="explain" aria-live="polite"></aside>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <h2>Согласовано 11.09.2026: как будет работать продукт</h2>
+    <p>Этих трёх решений не было ни в замысле, ни в чертеже, а от них зависит поведение шагов 1, 3 и 6. Владелец выбрал вариант A во всех трёх, решения записаны в <code>architecture/README.md</code>. Вариант B оставлен для сравнения.</p>
+    <div class="decisions" id="decisions"></div>
+    <div class="answer">Решение: <code id="answerCode"></code> · записано в <code>architecture/README.md</code></div>
+    <div class="owner-q">
+      <div><b>Решает Рафаэль</b>Какую выгоду даёт код: процент, рубли или подарок. В макете стоит 10% для примера.</div>
+      <div><b>Решает Рафаэль</b>Кто и откуда отгружает заказы с сайта, тарифы для регионов вне центра. <small>(pitch.md, «Додумать» 3)</small></div>
+      <div><b>Нужны документы</b>Оферта, отдельные согласия на данные и на рассылки, чеки. Без них первый рубль не принимаем.</div>
+      <div><b>Нужен доступ</b>Имя тестового поддомена и доступ к DNS. В макете стоит условное <code>new.ozonbox.ru</code>.</div>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="wrap">
+    <h2>Не входит в первую версию</h2>
+    <p>Из списка «Потом» в <code>idea/mvp.md</code>. В макете этого нет специально.</p>
+    <div class="later">
+      <span>Свой бот в директе</span><span>Еженедельный отчёт по каналам (сцена 2)</span><span>Смена сезона одной кнопкой (сцена 3)</span><span>Зима, весна, лето</span><span>SEO-многостраничник и переезд домена</span><span>Автопостинг</span><span>Сезонные карточки WB и Ozon через API</span><span>Админка</span><span>Сайт про озонотерапию</span>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Макет лежит локально: <code>X:/Смыслокод/ozonbox-roomtour/mockups/v1-scenariy-1/index.html</code>. Фото товаров скопированы из прототипа, цены - из его <code>js/data.js</code> от 09.09.2026. Никуда не опубликован и ни с чем не соединён.
+  </div>
+</footer>
+
+<script>
+/* Данные каталога - копия из прототипа js/data.js (цены на 09.09.2026). В продукте - из базы. */
+const PRODUCTS = [
+  {id:'stop-akne',name:'Бокс «Стоп акне»',price:1990,cats:['face','sets'],img:'stop-akne.jpg'},
+  {id:'krem-pryschi',name:'Лечебный крем против прыщей',price:967,cats:['face'],img:'krem-pryschi.jpg'},
+  {id:'super-kombo',name:'Набор «Супер комбо»',price:4999,cats:['face','sets'],img:'super-kombo.jpg'},
+  {id:'chistaya-kozha',name:'Безупречно чистая кожа',price:2800,cats:['face','sets'],img:'chistaya-kozha.jpg'},
+  {id:'super-trio',name:'Набор «Супер трио»',price:2893,cats:['face','sets'],img:'super-trio.jpg'},
+  {id:'super-duet',name:'Подарочный набор «Супер дуэт»',price:1976,cats:['sets'],img:'super-duet.jpg'},
+  {id:'ochischenie',name:'Озоновое очищение',price:1257,cats:['face'],img:'ochischenie.jpg'},
+  {id:'set-lico',name:'Сет для лица',price:4479,cats:['face','sets'],img:'set-lico.jpg'},
+  {id:'otri-6000',name:'Озонированное масло «Отри 6000»',price:899,cats:['face'],img:'otri-6000.jpg'},
+  {id:'shampun',name:'Шампунь «Озодермис»',price:1205,cats:['hair'],img:'shampun.jpg'},
+  {id:'maska-shampun',name:'Набор маска и шампунь',price:2352,cats:['hair','sets'],img:'maska-shampun.jpg'},
+  {id:'vosstanovlenie-volos',name:'Полное восстановление волос',price:2490,cats:['hair','sets'],img:'vosstanovlenie-volos.jpg'},
+  {id:'maska-volosy',name:'Озодермик, маска для волос',price:1306,cats:['hair'],img:'maska-volosy.jpg'},
+  {id:'idealnoe-telo',name:'Идеальное тело',price:3500,cats:['body','sets'],img:'idealnoe-telo.jpg'},
+  {id:'anticellulit',name:'Массажный крем для тела',price:1633,cats:['body'],img:'anticellulit.jpg'},
+  {id:'sos-boks',name:'Набор «СОС бокс»',price:1900,cats:['sets','hair'],img:'sos-boks.jpg'},
+  {id:'ozodermik-3',name:'Озодермик 3%',price:1195,cats:['face'],img:'ozodermik-3.jpg'},
+  {id:'ozodermik-5',name:'Озодермик 5%',price:1303,cats:['face'],img:'ozodermik-5.jpg'},
+  {id:'dnevnoy-krem',name:'Дневной крем',price:1419,cats:['face'],img:'dnevnoy-krem.jpg'}
+];
+const BY_ID = Object.fromEntries(PRODUCTS.map(p => [p.id, p]));
+const SCENE_IDS = ['super-trio', 'stop-akne', 'ochischenie', 'ozodermik-3'];
+const CATS = [['all','Все 19'],['face','Лицо'],['hair','Волосы'],['body','Тело'],['sets','Наборы']];
+/* Промокоды-примеры. В продукте - таблица промокодов в базе, проверка на сервере. */
+const CODES = {
+  'OSEN-R1': { pct: 10, channel: 'Instagram', campaign: 'Reels «Осенняя кожа», 12.09', utm: 'reels-1209', used: 27, limit: 200, until: '31.10' },
+  'OSEN-OLD': { err: 'expired' },
+  'OSEN-R0': { err: 'limit' }
+};
+const DELIVERY = { pvz: { label: 'СДЭК, пункт выдачи', price: 450 }, door: { label: 'Курьер до двери', price: 550 } };
+const LOGO = '<svg viewBox="0 0 31 32" fill="none" aria-hidden="true"><path d="M24.37 17.65c3.57.31 6.32 3.42 6.32 7.16V32h-6.9c-3.58 0-6.57-2.87-6.87-6.59-.35-4.43 3.2-8.13 7.45-7.76Z" fill="#3C6DF0"/><path d="M4.81 16c0-2.86 0-4.71.12-6.12.1-1.35.28-1.85.4-2.1a4.8 4.8 0 0 1 2.14-2.23c.23-.12.71-.3 2-.42 1.36-.11 3.13-.11 5.88-.11s4.52 0 5.87.11c1.3.12 1.78.3 2.01.42a4.8 4.8 0 0 1 2.14 2.23c.12.25.3.75.4 2.1.08 1.06.1 2.38.11 4.19a10.6 10.6 0 0 1 4.82 2.47V16c0-5.56 0-8.35-1.03-10.47A10.1 10.1 0 0 0 25.4 1.07C23.35 0 20.68 0 15.35 0S7.34 0 5.3 1.07a10.1 10.1 0 0 0-4.27 4.46C0 7.65 0 10.44 0 16s0 8.35 1.03 10.47a10.1 10.1 0 0 0 4.27 4.46C7.34 32 10.01 32 15.35 32h.52a11.5 11.5 0 0 1-2.37-5.02c-1.74 0-3-.03-4.02-.12-1.3-.11-1.78-.29-2.01-.42a4.8 4.8 0 0 1-2.14-2.22c-.12-.25-.3-.75-.4-2.1C4.82 20.7 4.81 18.86 4.81 16Z" fill="#0d1b2e"/></svg>';
+
+const PHASES = [['before','До действия'],['input','Ввод'],['wait','Ожидание'],['result','Результат'],['error','Ошибка']];
+const S = {
+  step: 0, phase: 'before', variant: 0, device: 'desktop', auto: false,
+  cart: { 'super-trio': 1 }, cartTouched: false, filter: 'all', p: 0,
+  promoInput: 'OSEN-R1', promo: null, promoErr: null,
+  form: { name: '', phone: '', email: '', city: '' }, delivery: 'pvz', consent: { offer: false, pd: false, news: false }, formErr: {},
+  payOutcome: null, done: new Set(), decisions: { 1: 'A', 2: 'A', 3: 'A' }
+};
+let timer = null;
+
+const rub = n => n.toLocaleString('ru-RU') + ' ₽';
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const mock = (t = 'Имитация') => `<span class="tag-mock">${t}</span>`;
+const warn = t => `<span class="warn">⚠️ ${t}</span>`;
+function cartItems() { return Object.entries(S.cart).filter(([, q]) => q > 0).map(([id, q]) => ({ ...BY_ID[id], q })); }
+function cartCount() { return cartItems().reduce((a, i) => a + i.q, 0); }
+function totals() {
+  const sub = cartItems().reduce((a, i) => a + i.price * i.q, 0);
+  const disc = S.promo ? Math.floor(sub * S.promo.pct / 100) : 0;
+  const del = DELIVERY[S.delivery].price;
+  return { sub, disc, del, sum: sub - disc + del };
+}
+function siteHead(bump) {
+  return `<div class="site-head"><div class="logo">${LOGO}<span class="logo-word">Ozone<span>Box</span></span></div>
+    <div class="head-nav"><span>Осень</span><span>Каталог</span><span>О составе</span></div>
+    <button class="cart-btn ${bump ? 'bump' : ''}" data-go="2" data-new="Новое: своя корзина">Корзина <span class="cnt">${cartCount()}</span></button></div>`;
+}
+function browser(url, inner) {
+  return `<div class="browser-bar"><span class="dots"><i></i><i></i><i></i></span><span class="url">${url}</span></div><div class="screen">${inner}</div>`;
+}
+const SITE_URL = '<b>new.ozonbox.ru</b>/?promo=OSEN-R1&amp;utm_source=instagram&amp;utm_content=reels-1209';
+
+/* ---------------- Шаги ---------------- */
+const STEPS = [
+{
+  title: 'Код в директе', short: 'Instagram → промокод', phone: true,
+  who: 'Покупательница (пример) и тот, кто ведёт Instagram @ozonebeauty. Пока это человек вручную.',
+  what: 'Под роликом написано кодовое слово. Человек пишет его в директ и получает промокод этого ролика и ссылку на новый сайт, где код уже подставлен.',
+  where: 'Код и его связь с роликом (канал, ролик, дата, лимит, срок) хранятся в базе сайта, в таблице промокодов. ' + warn('схемы ещё нет, шаг 3 чертежа') + ' Переписка остаётся в Instagram, у нас она не хранится.',
+  mockText: 'Весь экран нарисован. Своего бота нет, и в первой версии его не будет: первые недели код отправляет человек вручную или сервис вроде ChatPlace (idea/mvp.md, п. 8).',
+  rule: 'idea/proof-of-value.md, сцена 1 · idea/principles.md, правило 4: «ни одного ролика без кода».',
+  notes: {
+    before: 'Человек смотрит Reels. Подпись и призыв поверх ролика сделаны HTML, в самом видео букв нет.',
+    input: 'Напишите кодовое слово <b>ОСЕНЬ</b> и нажмите «Отправить».',
+    wait: 'Сообщение ушло. Ответ приходит не мгновенно: вручную это от минут до часов. ' + warn('сколько допустимо, решает владелец'),
+    result: 'Пришли код и ссылка. Метки <code>utm_source</code> и <code>utm_content</code> в ссылке - запасной способ узнать канал, если код не введут.'
+  },
+  errors: [
+    ['Коды ролика закончились', 'Лимит 200 из 200 исчерпан. Покупателю можно выдать код другого ролика, но тогда заказ припишется не тому ролику. ' + warn('правило не решено')],
+    ['Ответа нет', 'Никто не ответил за сутки. Код не выдан, покупатель может уйти на маркетплейс. В первой версии защита одна: владелец раз в день разбирает директ.']
+  ],
+  render(ph, v) {
+    const head = `<div class="chat-head"><div class="ava">OB</div><div class="who">ozonebeauty<small>Директ Instagram</small></div><span style="margin-left:auto">${mock()}</span></div>`;
+    const reel = small => `<div class="reel ${small ? 'small' : ''}"><span class="cap">Осенью кожа капризничает?</span><span class="cap-sub">Напишите ОСЕНЬ в директ - пришлём код на выгоду на сайте</span></div>`;
+    const me = `<div class="bubble me">ОСЕНЬ<span class="meta">12.09 · 21:14</span></div>`;
+    let body = '', foot = '';
+    if (ph === 'before') {
+      body = `${reel(false)}<div class="sys-note">Reels «Осенняя кожа» · 12.09 · текст поверх видео - HTML</div>`;
+      foot = `<button class="btn btn-brand" style="flex:1" data-phase="input">Написать в директ</button>`;
+    } else if (ph === 'input') {
+      body = `${reel(true)}<div class="sys-note">Кодовое слово - в подписи к ролику</div><div id="dmHint"></div>`;
+      foot = `<input class="inp" id="dmInput" placeholder="Сообщение…" autocomplete="off"><button class="btn btn-brand" id="dmSend">Отправить</button>`;
+    } else if (ph === 'wait') {
+      body = `${reel(true)}${me}<div class="sys-note">Доставлено · отвечает человек или ChatPlace</div><div class="typing"><i></i><i></i><i></i></div>`;
+    } else if (ph === 'result') {
+      body = `${reel(true)}${me}<div class="bubble them">Спасибо, что с нами! Ваш код: <b>OSEN-R1</b><br>Выгода на сайте - 10% ${warn('пример')}. Действует до 31.10.<br><a href="#" data-go="1">new.ozonbox.ru/?promo=OSEN-R1&amp;utm_source=instagram&amp;utm_content=reels-1209</a><span class="meta">12.09 · 21:31</span></div>`;
+      foot = `<button class="btn btn-buy" style="flex:1" data-go="1">Открыть ссылку → шаг 2</button>`;
+    } else {
+      body = v === 0
+        ? `${reel(true)}${me}<div class="bubble them">Коды этого ролика уже разобрали 🙁 Держите код другого ролика: <b>OSEN-R2</b><span class="meta">12.09 · 21:31</span></div><div class="msg err">Заказ с этим кодом припишется ролику R2, а не R1: картина каналов исказится.</div>`
+        : `${reel(true)}${me}<div class="sys-note">Прочитано · 13.09 · ответа нет</div><div class="msg err">Прошли сутки. Человек не получил код и, скорее всего, купил на маркетплейсе.</div>`;
+    }
+    return `<div class="chat">${head}<div class="chat-body">${body}</div>${foot ? `<div class="chat-foot">${foot}</div>` : ''}</div>`;
+  },
+  bind(ph) {
+    if (ph !== 'input') return;
+    const inp = document.getElementById('dmInput'), send = () => {
+      const val = inp.value.trim().toUpperCase().replace('Ë', 'Е');
+      if (val === 'ОСЕНЬ') { S.auto = true; setPhase('wait'); }
+      else document.getElementById('dmHint').innerHTML = '<div class="msg info">Кодовое слово для этого ролика - ОСЕНЬ. Другие слова ответ не запускают.</div>';
+    };
+    document.getElementById('dmSend').onclick = send;
+    inp.onkeydown = e => { if (e.key === 'Enter') send(); };
+    inp.focus();
+  }
+},
+{
+  title: 'Осенняя сцена', short: 'Сайт по ссылке',
+  who: 'Покупательница и сайт. ' + warn('имя тестового поддомена не согласовано'),
+  what: 'Ссылка открывает осеннюю сцену. При прокрутке камера «летит» по видео, и появляются средства под осенние проблемы кожи. Ниже - весь каталог из 19 товаров. Код и метки из ссылки сайт запоминает до оформления заказа.',
+  where: 'Код и метки источника хранятся в браузере покупателя до создания заказа (cookie сайта). ' + warn('предложение') + ' Товары, цены и тексты сезона - в базе (правило 2). В макете это копия из прототипа от 09.09.',
+  mockText: 'Видео нет: вместо него CSS-фон и фото товаров. Так сайт и должен работать, пока нет футажей (правило 3). Названия товаров взяты из прототипа как есть. Проверить их по закону о рекламе - отдельная задача.',
+  rule: '00-правила, «Всегда» 2-4 · idea/mvp.md, п. 1-2 · idea/principles.md, правило 7.',
+  notes: {
+    before: 'Страница открылась по ссылке из директа. Сверху плашка с кодом - это новое.',
+    input: 'Прокрутите сцену внутри рамки: появятся средства. Нажмите «В корзину» на любом.',
+    wait: 'Видео сцены ещё грузится. Пока его нет, видна заглушка, а весь текст и кнопки уже работают.',
+    result: 'Товар в корзине, счётчик в шапке обновился. Дальше - корзина.'
+  },
+  errors: [
+    ['Видео не загрузилось', 'Медленный интернет или ошибка файла. Сцена остаётся на фото и CSS-фоне, покупка не ломается.'],
+    ['Пришли без кода', 'Человек пришёл из поиска или по старой ссылке. Плашки нет, источник возьмётся из utm-меток или будет записан как <code>unknown</code>.']
+  ],
+  render(ph, v) {
+    const noCode = ph === 'error' && v === 1, noVideo = (ph === 'error' && v === 0) || ph === 'wait';
+    const strip = noCode ? '' : `<div class="promo-strip" data-new="Новое: код из ссылки">Код <b>OSEN-R1</b> сохранён и применится в корзине · выгода 10% ${warn('пример')}</div>`;
+    const leaves = [[12, 18, 26, 30], [70, 12, 18, 120], [84, 58, 22, 200], [30, 70, 14, 80], [55, 35, 12, 160]].map(([x, y, s, r]) => `<i class="leaf" style="left:${x}%;top:${y}%;width:${s}px;height:${s}px;transform:rotate(${r}deg) translateY(calc(var(--p) * 120px))"></i>`).join('');
+    const cards = SCENE_IDS.map((id, i) => { const p = BY_ID[id]; return `<div class="sp" data-i="${i}"><img src="assets/${p.img}" alt=""><div class="nm">${esc(p.name)}</div><div class="pr">${rub(p.price)}</div><button class="btn btn-buy btn-sm" data-add="${id}">В корзину</button></div>`; }).join('');
+    const url = noCode ? '<b>new.ozonbox.ru</b>/' : SITE_URL;
+    return browser(url, `${siteHead(ph === 'result')}${strip}
+      <div class="scene-scroll" id="sceneScroll"><div class="scene-track">
+        <div class="scene ${noVideo ? 'no-video' : ''}" id="scene" style="--p:${S.p}">
+          <div class="scene-bg"></div>${noVideo ? '' : leaves}
+          <span class="video-note">${mock(noVideo ? 'Заглушка вместо видео' : 'CSS вместо видео')}</span>
+          ${ph === 'wait' ? '<div class="skeleton">Видео догружается… текст и кнопки уже доступны</div>' : ''}
+          <div class="scene-text" id="sceneText" data-new="Новое: сезонная сцена">
+            <div class="kicker">Сезон · осень</div>
+            <h2>Осенью кожа реагирует на холод и отопление</h2>
+            <p>Мы собрали уход под это время года. Текст - HTML поверх сцены: его можно править и индексировать.</p>
+          </div>
+          <div class="scene-hint" id="sceneHint">Прокрутите вниз ↓</div>
+          <div class="progress"><i></i></div>
+          <div class="scene-products">${cards}</div>
+        </div>
+      </div>
+      <div class="catalog">
+        <h3>Весь каталог</h3>
+        <p class="sub">19 товаров, карточки как в прототипе. Изменено: нет «зачёркнутых» цен и обещаний «лечит» (правило 00). <span data-new="Изменено: без зачёркнутых цен" style="display:inline-block;width:1px;height:1px"></span></p>
+        <div class="filters">${CATS.map(([id, l]) => `<button class="filter ${S.filter === id ? 'is-on' : ''}" data-filter="${id}">${l}</button>`).join('')}</div>
+        <div class="grid">${PRODUCTS.filter(p => S.filter === 'all' || p.cats.includes(S.filter)).map(p => `<div class="card"><div class="card-media"><img src="assets/${p.img}" alt="" loading="lazy"></div><div class="card-body"><div class="card-name">${esc(p.name)}</div><div class="price">${rub(p.price)}</div><button class="btn btn-buy btn-sm" style="margin-top:8px" data-add="${p.id}">В корзину</button></div></div>`).join('')}</div>
+      </div></div>`);
+  },
+  bind(ph) {
+    const box = document.getElementById('sceneScroll'), scene = document.getElementById('scene');
+    const upd = () => {
+      const max = 1700 - box.clientHeight;
+      S.p = Math.max(0, Math.min(1, box.scrollTop / max));
+      scene.style.setProperty('--p', S.p.toFixed(3));
+      document.querySelectorAll('.sp').forEach(el => el.classList.toggle('in', S.p > .12 + el.dataset.i * .16));
+      document.getElementById('sceneText').style.opacity = String(1 - Math.max(0, S.p - .55) * 2);
+      document.getElementById('sceneHint').style.opacity = S.p > .05 ? '0' : '1';
+    };
+    box.addEventListener('scroll', upd, { passive: true });
+    if (ph === 'result' || (ph === 'error' && S.variant === 0)) box.scrollTop = (1700 - box.clientHeight) * .8;
+    else box.scrollTop = S.p * (1700 - box.clientHeight);
+    upd();
+    document.querySelectorAll('[data-filter]').forEach(b => b.onclick = () => { S.filter = b.dataset.filter; const top = box.scrollTop; render(); document.getElementById('sceneScroll').scrollTop = top; });
+    if (ph === 'wait') { clearTimeout(timer); timer = setTimeout(() => { if (S.step === 1 && S.phase === 'wait') setPhase('input'); }, 2600); }
+  }
+},
+{
+  title: 'Корзина и код', short: 'Проверка промокода',
+  who: 'Покупательница и сервер сайта, который проверяет код.',
+  what: 'Код из ссылки уже стоит в поле. По кнопке «Применить» сервер проверяет, есть ли такой код, не истёк ли срок и не исчерпан ли лимит. В ответ сайт получает выгоду и канал.',
+  where: 'Корзина хранится в браузере. Проверка только читает таблицу промокодов: пока заказа нет, в базу ничего не пишется.',
+  mockText: 'Сервера нет, проверку изображает таймер в браузере. Работают коды OSEN-R1 (успех), OSEN-OLD (срок вышел) и OSEN-R0 (лимит). Выгода 10% - пример, размер решает Рафаэль.',
+  rule: 'idea/mvp.md, п. 3-4 · 00-правила, «Всегда» 1: у каждого заказа есть источник.',
+  notes: {
+    before: 'Корзина открыта. Код подставлен из ссылки, но ещё не проверен.',
+    input: 'Можно стереть код и ввести свой. Попробуйте OSEN-OLD, OSEN-R0 или любой другой.',
+    wait: 'Сервер проверяет код. Кнопка оплаты пока неактивна, чтобы не уйти к оплате со старой суммой.',
+    result: 'Код принят: видны выгода и канал, к которому привяжется заказ.'
+  },
+  errors: [
+    ['Код не найден', 'Опечатка или чужой код. По решению 3: покупку не блокируем, можно оплатить без выгоды.'],
+    ['Срок вышел', 'Код действовал до определённой даты. Сообщаем об этом прямо, покупку не блокируем.'],
+    ['Лимит исчерпан', 'Код ролика использован 200 раз из 200. Это защита от утечки кода в купонные агрегаторы (правило 4).'],
+    ['Нет связи', 'Сервер не ответил. Предлагаем повторить. Если не выйдет, заказ пройдёт без выгоды, а источник возьмётся из ссылки.']
+  ],
+  render(ph, v) {
+    if (ph === 'error' && S.promoErr === null) S.promoErr = ['notfound', 'expired', 'limit', 'network'][v];
+    const items = cartItems(); const t = totals();
+    const errText = { notfound: 'Такого кода нет. Проверьте буквы или оформите заказ без выгоды.', expired: 'Срок действия кода закончился. Можно оформить заказ без выгоды.', limit: 'Код этого ролика уже использован нужное число раз. Можно оформить заказ без выгоды.', network: 'Не получилось проверить код: нет связи с сервером.', word: 'ОСЕНЬ - это кодовое слово для директа. Промокод пришёл в ответе, например OSEN-R1.' };
+    let msg = '';
+    if (ph === 'wait') msg = `<div class="msg info"><span class="spinner"></span>&nbsp; Проверяем код…</div>`;
+    else if (S.promo && ph === 'result') msg = `<div class="msg ok">Код <b>${S.promo.code}</b> применён: выгода ${S.promo.pct}% ${warn('пример')}<br><span class="src-badge" data-new="Новое: источник заказа">Источник заказа: ${S.promo.channel} · ${S.promo.campaign}</span></div>`;
+    else if (ph === 'error' && S.promoErr) msg = `<div class="msg err">${errText[S.promoErr]} ${S.promoErr === 'network' ? '<button class="btn btn-ghost btn-sm" id="retry" style="margin-left:6px">Повторить</button>' : ''}</div><div class="msg info">Источник всё равно запишется: из ссылки (utm_content=reels-1209) или <code>unknown</code> - такой заказ попадёт в отчёт как проблема.</div>`;
+    const list = items.length ? items.map(i => `<div class="line-item"><img src="assets/${i.img}" alt=""><div><div class="nm">${esc(i.name)}</div><div class="qty">${i.q} шт. · ${rub(i.price)}</div></div><div class="price">${rub(i.price * i.q)}</div></div>`).join('') : '<p style="color:var(--ink-mute)">Корзина пуста - добавьте товар на шаге 2.</p>';
+    return browser('<b>new.ozonbox.ru</b>/cart', `${siteHead(false)}<div class="panel"><h3>Корзина</h3>${list}
+      <div class="promo-box" data-new="Новое: промокод">
+        <label for="promoInp">Промокод</label>
+        <div class="promo-row"><input class="inp ${ph === 'error' && S.promoErr !== 'network' ? 'bad' : ''}" id="promoInp" value="${esc(S.promoInput)}" autocomplete="off" ${ph === 'wait' ? 'disabled' : ''}><button class="btn btn-buy" id="promoApply" ${ph === 'wait' ? 'disabled' : ''}>Применить</button></div>
+        ${ph === 'before' ? '<div class="msg info">Код подставлен из ссылки. Нажмите «Применить».</div>' : ''}${msg}
+      </div>
+      <div class="totals"><div class="row"><span>Товары</span><span>${rub(t.sub)}</span></div>
+        ${t.disc ? `<div class="row"><span>Выгода по коду</span><span class="disc">−${rub(t.disc)}</span></div>` : ''}
+        <div class="row"><span>Доставка (выбор на следующем шаге)</span><span>от ${rub(450)}</span></div>
+        <div class="row sum"><span>Итого</span><span>${rub(t.sub - t.disc + 450)}</span></div></div>
+      <button class="btn btn-buy" style="width:100%;margin-top:14px;padding:14px" data-go="3" ${ph === 'wait' || !items.length ? 'disabled' : ''}>Оформить заказ</button>
+    </div>`);
+  },
+  bind(ph) {
+    const inp = document.getElementById('promoInp');
+    const apply = () => {
+      S.promoInput = inp.value.trim().toUpperCase(); S.promo = null; S.promoErr = null; S.auto = true; setPhase('wait');
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (S.step !== 2 || S.phase !== 'wait') return;
+        const c = CODES[S.promoInput];
+        if (c && !c.err) { S.promo = { code: S.promoInput, ...c }; setPhase('result'); }
+        else { S.promoErr = S.promoInput === 'ОСЕНЬ' ? 'word' : c ? c.err : (S.promoInput === 'NET' ? 'network' : 'notfound'); S.variant = ['notfound', 'expired', 'limit', 'network'].indexOf(S.promoErr); setPhase('error', true); }
+      }, 1300);
+    };
+    if (inp) { inp.oninput = () => { if (S.phase !== 'input') { S.phase = 'input'; S.promoInput = inp.value; const pos = inp.selectionStart; render(); const n = document.getElementById('promoInp'); n.focus(); n.setSelectionRange(pos, pos); } else S.promoInput = inp.value; }; inp.onkeydown = e => { if (e.key === 'Enter') apply(); }; }
+    const btn = document.getElementById('promoApply'); if (btn) btn.onclick = apply;
+    const r = document.getElementById('retry'); if (r) r.onclick = () => { S.promoInput = 'OSEN-R1'; apply(); };
+    if (ph === 'wait' && !S.auto) { clearTimeout(timer); timer = setTimeout(() => { if (S.step === 2 && S.phase === 'wait') { S.promo = { code: 'OSEN-R1', ...CODES['OSEN-R1'] }; setPhase('result'); } }, 1300); }
+    if (ph === 'result' && !S.promo) S.promo = { code: 'OSEN-R1', ...CODES['OSEN-R1'] };
+  }
+},
+{
+  title: 'Оформление', short: 'Контакты и согласия',
+  who: 'Покупательница и сервер сайта, который создаёт заказ.',
+  what: 'Покупательница заполняет контакты и доставку и отмечает каждое согласие отдельно. По кнопке сервер создаёт заказ со статусом «ждёт оплаты» и сразу записывает его источник.',
+  where: 'Заказ и личные данные (имя, телефон, email, адрес) хранятся в базе PostgreSQL на сервере в РФ (152-ФЗ). В Telegram, в логи и в запросы к ИИ личные данные не попадают.',
+  mockText: 'Заказ не создаётся, номер №1042 выдуман. Оферты и текстов согласий пока нет: без них первый рубль не принимаем (принцип 5). Тарифы доставки взяты с текущего сайта, для регионов вне центра их нет.',
+  rule: '00-правила, «Запрещено»: ПДн вне РФ, оплата без оферты и раздельных согласий · .business/company/legal.md.',
+  notes: {
+    before: 'Пустая форма. Согласие на рассылки - отдельная галочка, по умолчанию не отмечена.',
+    input: 'Заполните поля или нажмите «Заполнить примером», затем «Перейти к оплате».',
+    wait: 'Сервер создаёт заказ и готовит платёж в CloudPayments.',
+    result: 'Заказ №1042 создан: статус «ждёт оплаты», источник OSEN-R1 → Instagram, Reels 12.09.'
+  },
+  errors: [
+    ['Ошибка в форме', 'Сайт подсвечивает поле и объясняет, что не так. Данные не теряются, заказ ещё не создан.'],
+    ['Нет документов', 'Пока нет оферты и текстов согласий, кнопка оплаты выключена - так в первой версии и будет до их появления.']
+  ],
+  render(ph, v) {
+    const t = totals(), f = S.form, e = ph === 'error' && v === 0 ? { phone: 'Номер телефона: 11 цифр, например +7 910 000-00-00', pd: true } : S.formErr;
+    const blocked = ph === 'error' && v === 1;
+    const fld = (k, l, ph2, type = 'text') => `<div class="field"><label for="f_${k}">${l}</label><input class="inp ${e[k] ? 'bad' : ''}" id="f_${k}" data-f="${k}" type="${type}" value="${esc(f[k])}" placeholder="${ph2}" autocomplete="off">${e[k] ? `<div class="hint">${e[k]}</div>` : ''}</div>`;
+    let over = '';
+    if (ph === 'wait') over = `<div class="veil"><div class="paywin" style="border-style:solid;border-color:#fff;text-align:center"><span class="spinner"></span><h4>Создаём заказ…</h4><p style="margin:0;color:var(--ink-soft);font-size:13.5px">Статус «ждёт оплаты», источник OSEN-R1</p></div></div>`;
+    if (ph === 'result') over = `<div class="veil"><div class="paywin" style="border-style:solid;border-color:#fff"><span class="pill wait">ждёт оплаты</span><h4>Заказ №1042 создан</h4><p style="margin:0 0 12px;color:var(--ink-soft);font-size:13.5px">Источник: OSEN-R1 · Instagram · Reels 12.09. Следующий шаг - окно оплаты.</p><button class="btn btn-buy" style="width:100%" data-go="4">К оплате → шаг 5</button></div></div>`;
+    return browser('<b>new.ozonbox.ru</b>/checkout', `${siteHead(false)}${over}<div class="panel"><h3>Оформление</h3>
+      <div class="form-grid">${fld('name', 'Имя', 'Анна')}${fld('phone', 'Телефон', '+7 …', 'tel')}${fld('email', 'Email для чека', 'anna@example.ru', 'email')}${fld('city', 'Город и пункт выдачи', 'Нижний Новгород, …')}</div>
+      <div class="sec-title">Доставка ${warn('тарифы для регионов вне центра не указаны')}</div>
+      ${Object.entries(DELIVERY).map(([k, d]) => `<label class="choice"><input type="radio" name="dl" value="${k}" ${S.delivery === k ? 'checked' : ''}><span><b>${d.label}</b> · ${rub(d.price)}<small>Центральная часть РФ, тариф с текущего сайта</small></span></label>`).join('')}
+      <div class="sec-title" data-new="Изменено: согласия раздельно">Согласия - каждое отдельно</div>
+      <label class="choice ${e.offer ? 'bad' : ''}"><input type="checkbox" data-c="offer" ${S.consent.offer ? 'checked' : ''}><span>Принимаю условия <a href="#" onclick="return false">публичной оферты</a> ${warn('документа ещё нет')}<small>Обязательно</small></span></label>
+      <label class="choice ${e.pd ? 'bad' : ''}"><input type="checkbox" data-c="pd" ${S.consent.pd ? 'checked' : ''}><span>Даю согласие на обработку персональных данных<small>Обязательно · отдельный документ · данные хранятся в РФ</small></span></label>
+      <label class="choice"><input type="checkbox" data-c="news" ${S.consent.news ? 'checked' : ''}><span>Хочу получать новости и акции<small>Не обязательно · сейчас на Tilda это склеено с согласием на данные</small></span></label>
+      ${e.pd && ph === 'error' ? '<div class="msg err">Отметьте согласие на обработку персональных данных - без него заказ оформить нельзя.</div>' : ''}
+      ${blocked ? '<div class="msg err">Оплата пока недоступна: нет оферты и текстов согласий. Это правило «первый рубль - только после документов».</div>' : ''}
+      <div class="totals"><div class="row"><span>Товары</span><span>${rub(t.sub)}</span></div>${t.disc ? `<div class="row"><span>Выгода по коду OSEN-R1</span><span class="disc">−${rub(t.disc)}</span></div>` : ''}<div class="row"><span>${DELIVERY[S.delivery].label}</span><span>${rub(t.del)}</span></div><div class="row sum"><span>Итого</span><span>${rub(t.sum)}</span></div></div>
+      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap"><button class="btn btn-ghost" id="fillDemo">Заполнить примером</button><button class="btn btn-buy" id="toPay" style="flex:1;padding:14px" ${blocked ? 'disabled' : ''}>Перейти к оплате · ${rub(t.sum)}</button></div>
+    </div>`);
+  },
+  bind(ph) {
+    document.querySelectorAll('[data-f]').forEach(i => i.oninput = () => { S.form[i.dataset.f] = i.value; if (S.phase === 'before') { S.phase = 'input'; paintPhases(); paintExplain(); } });
+    document.querySelectorAll('input[name=dl]').forEach(r => r.onchange = () => { S.delivery = r.value; render(); });
+    document.querySelectorAll('[data-c]').forEach(c => c.onchange = () => { S.consent[c.dataset.c] = c.checked; });
+    const fill = document.getElementById('fillDemo'); if (fill) fill.onclick = () => { S.form = { name: 'Анна', phone: '+7 910 000-00-00', email: 'anna@example.ru', city: 'Нижний Новгород, ПВЗ на Большой Покровской' }; S.consent = { offer: true, pd: true, news: false }; S.formErr = {}; setPhase('input'); };
+    const go = document.getElementById('toPay'); if (go) go.onclick = () => {
+      const err = {};
+      if (!S.form.name.trim()) err.name = 'Как к вам обращаться?';
+      if (S.form.phone.replace(/\D/g, '').length !== 11) err.phone = 'Номер телефона: 11 цифр, например +7 910 000-00-00';
+      if (!/.+@.+\..+/.test(S.form.email)) err.email = 'Нужен email: на него придёт чек';
+      if (!S.form.city.trim()) err.city = 'Куда доставить?';
+      if (!S.consent.offer) err.offer = true;
+      if (!S.consent.pd) err.pd = true;
+      S.formErr = err;
+      if (Object.keys(err).length) { S.phase = 'input'; render(); return; }
+      S.auto = true; setPhase('wait'); clearTimeout(timer); timer = setTimeout(() => { if (S.step === 3 && S.phase === 'wait') setPhase('result'); }, 1400);
+    };
+    if (ph === 'wait' && !S.auto) { clearTimeout(timer); timer = setTimeout(() => { if (S.step === 3 && S.phase === 'wait') setPhase('result'); }, 1400); }
+  }
+},
+{
+  title: 'Оплата', short: 'Окно CloudPayments',
+  who: 'Покупательница, CloudPayments и сервер сайта.',
+  what: 'Поверх сайта открывается окно CloudPayments, и данные карты видит только оно. Успех в окне - ещё не оплата: заказ станет оплаченным, когда сервер получит уведомление от CloudPayments и сверит сумму.',
+  where: 'Данные карты и чек остаются у CloudPayments. ' + warn('чек 54-ФЗ настроить') + ' У нас в заказе хранятся ID транзакции, статус и сумма в копейках.',
+  mockText: 'Никакой оплаты нет. Окно нарисовано, полей карты в нём нарочно нет: вводить карту в макете негде.',
+  rule: '00-правила, «Всегда» 5: копейки, повторное уведомление не создаёт второй платёж · «Запрещено»: данные карт через свой сервер.',
+  notes: {
+    before: 'Покупательница видит итог и кнопку «Оплатить».',
+    input: 'Окно оплаты открыто. Выберите, чем закончится оплата.',
+    wait: 'Банк ответил. Ждём уведомление CloudPayments на сервер, покупательница видит «Проверяем оплату».',
+    result: 'Оплата подтверждена сервером - переходим к результату.'
+  },
+  errors: [
+    ['Банк отклонил', 'Карта отклонена. Заказ остаётся «ждёт оплаты», в Telegram ничего не уходит. Можно попробовать ещё раз.'],
+    ['Окно закрыто', 'Покупательница закрыла окно. Заказ ждёт оплаты, корзина сохранена. В Telegram об этом не пишем (решение 2), заказ виден в базе.'],
+    ['Уведомление задерживается', 'Банк списал деньги, но уведомление ещё не пришло. Показываем «Оплата обрабатывается», заказ станет оплаченным, как только оно придёт. ' + warn('через сколько минут поднимать тревогу')]
+  ],
+  render(ph, v) {
+    const t = totals();
+    const base = `<div class="panel"><h3>Оплата заказа №1042</h3><div class="totals"><div class="row"><span>Товары со скидкой по коду</span><span>${rub(t.sub - t.disc)}</span></div><div class="row"><span>${DELIVERY[S.delivery].label}</span><span>${rub(t.del)}</span></div><div class="row sum"><span>К оплате</span><span>${rub(t.sum)}</span></div></div>
+      <button class="btn btn-buy" style="width:100%;margin-top:14px;padding:14px" data-phase="input">Оплатить ${rub(t.sum)}</button>
+      <p style="font-size:12.5px;color:var(--ink-mute);margin:10px 0 0">Карты МИР, Сбер, Альфа, Т-Банк - как на текущем сайте. Оплата через CloudPayments ${warn('сверить с договором')}</p></div>`;
+    const win = inner => `<div class="veil"><div class="paywin"><div style="display:flex;justify-content:space-between;align-items:center">${mock('Имитация окна CloudPayments')}</div>${inner}</div></div>`;
+    let over = '';
+    if (ph === 'input') over = win(`<h4>OzoneBox · заказ №1042</h4><div class="amt">${rub(t.sum)}</div><div class="nocard">Здесь в настоящем окне будут поля карты. Их видит только CloudPayments, сайт OzoneBox номер карты не получает. В макете полей нет специально.</div><div class="sim"><button class="btn btn-brand" data-pay="ok">Смоделировать: оплата прошла</button><button class="btn btn-ghost" data-pay="declined">Смоделировать: банк отклонил</button><button class="btn btn-ghost" data-pay="closed">Смоделировать: закрыть окно</button></div>`);
+    if (ph === 'wait') over = win(`<h4>Проверяем оплату…</h4><div class="amt">${rub(t.sum)}</div><p style="font-size:13.5px;color:var(--ink-soft);margin:0"><span class="spinner"></span>&nbsp; Банк ответил «успешно». Ждём подтверждение CloudPayments на сервер - только после него заказ станет оплаченным.</p>`);
+    if (ph === 'result') over = win(`<span class="pill paid">оплачен</span><h4 style="margin-top:10px">Оплата подтверждена</h4><p style="font-size:13.5px;color:var(--ink-soft)">Сервер получил уведомление, сверил сумму ${rub(t.sum)} и отметил заказ оплаченным.</p><button class="btn btn-buy" style="width:100%" data-go="5">Что увидим → шаг 6</button>`);
+    if (ph === 'error') over = v === 1 ? '' : win(v === 0
+      ? `<span class="pill bad">отклонено</span><h4 style="margin-top:10px">Банк отклонил платёж</h4><p style="font-size:13.5px;color:var(--ink-soft)">Деньги не списаны. Заказ №1042 ждёт оплаты, в Telegram ничего не отправлено.</p><button class="btn btn-buy" style="width:100%" data-phase="input">Попробовать ещё раз</button>`
+      : `<span class="pill wait">обрабатывается</span><h4 style="margin-top:10px">Оплата обрабатывается</h4><p style="font-size:13.5px;color:var(--ink-soft)">Мы получили ответ банка и ждём подтверждение. Страницу можно закрыть - заказ станет оплаченным автоматически, а на email придёт чек.</p>`);
+    const closedMsg = ph === 'error' && v === 1 ? '<div class="msg info" style="margin:0 22px">Окно оплаты закрыто. Заказ №1042 сохранён и ждёт оплаты.</div>' : '';
+    return browser('<b>new.ozonbox.ru</b>/pay/1042', `${siteHead(false)}${over}${closedMsg}${base}`);
+  },
+  bind(ph) {
+    document.querySelectorAll('[data-pay]').forEach(b => b.onclick = () => {
+      const o = b.dataset.pay; S.auto = true;
+      if (o === 'ok') { setPhase('wait'); clearTimeout(timer); timer = setTimeout(() => { if (S.step === 4 && S.phase === 'wait') setPhase('result'); }, 1700); }
+      else { S.variant = o === 'declined' ? 0 : 1; setPhase('error', true); }
+    });
+    if (ph === 'wait' && !S.auto) { clearTimeout(timer); timer = setTimeout(() => { if (S.step === 4 && S.phase === 'wait') setPhase('result'); }, 1700); }
+  }
+},
+{
+  title: 'Заказ и канал', short: 'Telegram + база',
+  who: 'Сервер сайта и Telegram-бот. Сообщения читают Рафаэль и ты.',
+  what: 'Сервер отмечает заказ оплаченным и отправляет в Telegram короткое сообщение: номер, сумма, состав, код и канал. Так видно, какой ролик продал.',
+  where: 'Заказ хранится в базе в РФ, сообщение - в Telegram-чате «Заказы OzoneBox» (ID чата задаётся в <code>.env</code>). Отчёт по каналам появится позже, это сцена 2.',
+  mockText: 'Бот не подключён: токен владелец вводит сам. Сообщение и строка базы нарисованы. Названия таблиц и полей - предложение, файл 03-база-данных.md ещё черновик.',
+  rule: 'idea/proof-of-value.md, «Проверяемый факт» · 00-правила, «Запрещено»: ПДн в Telegram · «Всегда» 5: идемпотентность.',
+  notes: {
+    before: 'Заказ ждёт уведомления об оплате. Сообщений в Telegram ещё нет.',
+    input: 'Нажмите «Пришло уведомление от CloudPayments» - так это выглядит изнутри.',
+    wait: 'Сервер проверяет подпись и сумму, меняет статус заказа и ставит сообщение в очередь.',
+    result: 'Покупательница видит «Спасибо», в Telegram пришло сообщение, в базе - оплаченный заказ с каналом.'
+  },
+  errors: [
+    ['Повторное уведомление', 'CloudPayments прислал то же уведомление ещё раз. Заказ уже оплачен, второй платёж не создаётся, второе сообщение не уходит.'],
+    ['Telegram недоступен', 'Сообщение не ушло. Заказ всё равно оплачен, отправка повторится позже. ' + warn('сколько раз повторять')],
+    ['Заказ без кода', 'Человек пришёл без кода и без меток. Канал записан как <code>unknown</code>, и такой заказ помечается как проблема в отчёте (правило 1).']
+  ],
+  render(ph, v) {
+    const t = totals();
+    const unknown = ph === 'error' && v === 2;
+    const composition = cartItems().map(i => `${i.name} ×${i.q}`).join(', ') || 'Набор «Супер трио» ×1';
+    const msg = `✅ Оплачен заказ №1042\nСумма: ${rub(t.sum)}\nСостав: ${composition}\nКод: ${unknown ? '-' : 'OSEN-R1'}\nКанал: ${unknown ? 'unknown ⚠️ проверить' : 'Instagram · Reels «Осенняя кожа», 12.09'}`;
+    const paid = ph === 'result' || ph === 'error';
+    const status = paid ? '<span class="pill paid">paid</span>' : '<span class="pill wait">awaiting_payment</span>';
+    let tg = '';
+    if (ph === 'before' || ph === 'input') tg = '<div class="sys-note">Сообщений пока нет</div>';
+    else if (ph === 'wait') tg = '<div class="typing"><i></i><i></i><i></i></div>';
+    else if (ph === 'error' && v === 1) tg = '<div class="sys-note">Telegram не ответил · повтор через 1 мин</div>';
+    else tg = `<div class="bubble them bot">${esc(msg)}<span class="meta">21:47</span></div>${ph === 'error' && v === 0 ? '<div class="sys-note">Повторное уведомление 21:48 · заказ уже оплачен · сообщение не отправлено</div>' : ''}`;
+    const buyer = paid
+      ? `<div class="thanks"><span class="pill paid">оплачен</span><div class="big">Спасибо! Заказ №1042 оплачен</div><p style="margin:0;color:var(--ink-soft);font-size:13.5px">Чек придёт на anna@example.ru. Дальше - доставка: ${warn('кто и когда отгружает, не решено')}</p></div>`
+      : `<div class="thanks"><span class="pill wait">ждёт оплаты</span><div class="big">Проверяем оплату…</div>${ph === 'input' ? '<button class="btn btn-brand" id="hook" style="margin-top:8px">Пришло уведомление от CloudPayments</button>' : ''}${ph === 'wait' ? '<p style="font-size:13.5px;color:var(--ink-soft)"><span class="spinner"></span>&nbsp; сервер обрабатывает уведомление</p>' : ''}</div>`;
+    return `<div class="result-grid">
+      <div><div class="col-title">Покупательница видит</div>${buyer}</div>
+      <div class="tg-wrap"><div class="col-title">Telegram · «Заказы OzoneBox» ${mock()}</div><div class="chat"><div class="chat-head"><div class="ava">🤖</div><div class="who">OzoneBox · заказы<small>бот · участники: Рафаэль и ты</small></div></div><div class="chat-body">${tg}</div></div></div>
+      <div class="db"><div class="col-title">База на сервере в РФ · таблица заказов ${mock('Предложение схемы')}</div><div class="db-wrap"><table class="db-t">
+        <tr><th>id</th><th>status</th><th>total_kopecks</th><th>promo_code</th><th>source</th><th>utm_content</th><th>payment_tx_id</th><th>customer</th><th>created_at</th></tr>
+        <tr><td>1042</td><td>${status}</td><td>${t.sum * 100}</td><td>${unknown ? 'null' : 'OSEN-R1'}</td><td>${unknown ? '<span class="pill bad">unknown</span>' : 'instagram_reels'}</td><td>${unknown ? 'null' : 'reels-1209'}</td><td>${paid ? 'cp_…8f21' : 'null'}</td><td class="pd">имя, телефон, адрес - здесь, в Telegram не уходят</td><td>2026-09-12 21:44</td></tr>
+      </table></div></div>
+    </div>`;
+  },
+  bind(ph) {
+    const h = document.getElementById('hook');
+    if (h) h.onclick = () => { S.auto = true; setPhase('wait'); clearTimeout(timer); timer = setTimeout(() => { if (S.step === 5 && S.phase === 'wait') setPhase('result'); }, 1500); };
+    if (ph === 'wait' && !S.auto) { clearTimeout(timer); timer = setTimeout(() => { if (S.step === 5 && S.phase === 'wait') setPhase('result'); }, 1500); }
+  }
+}
+];
+
+/* ---------------- Решения на согласование ---------------- */
+const DECISIONS = [
+  { n: 1, title: 'Какой промокод получает человек', opts: [
+    ['A', 'Один код на ролик, с лимитом и сроком', 'Например, OSEN-R1: 200 использований до 31.10. В директ всем уходит один и тот же текст - это легко делать вручную или через ChatPlace. Канал виден с точностью до ролика.'],
+    ['B', 'Уникальный одноразовый код каждому', 'Код из заранее выпущенной серии ролика. Точнее и защищённее от утечек, но каждому нужно выдать свой код - вручную это тяжело, нужен сервис.']],
+    why: 'Выбран A: оба варианта соблюдают правило 4 («одноразовые или с лимитом»), а первой версии нужна точность до ролика, не до человека. Вариант B можно добавить позже, не меняя остальное.' },
+  { n: 2, title: 'О чём бот пишет в Telegram', opts: [
+    ['A', 'Только об оплаченных заказах', 'Сообщение уходит после подтверждения CloudPayments. Неоплаченные попытки видны в базе, но чат ими не засоряется.'],
+    ['B', 'Ещё и о брошенных оплатах', 'Отдельное сообщение, если заказ ждёт оплаты больше часа. Можно дозвониться, но больше шума и риск написать лишнее.']],
+    why: 'Выбран A: принцип 3 требует одну понятную цифру для Рафаэля, без потока сообщений. К брошенным заказам вернёмся вместе с отчётом (сцена 2).' },
+  { n: 3, title: 'Если код не сработал', opts: [
+    ['A', 'Не мешать покупке', 'Честно показать причину и дать оплатить без выгоды. Источник берётся из utm-меток ссылки или пишется как unknown.'],
+    ['B', 'Не пускать к оплате', 'Пока код не исправлен или не удалён из поля, оформить заказ нельзя.']],
+    why: 'Выбран A: главная метрика - оплаченные заказы, а запасной источник (utm) почти всегда есть. Вариант B теряет покупателей из-за опечатки.' }
+];
+function paintDecisions() {
+  document.getElementById('decisions').innerHTML = DECISIONS.map(d => `<div class="dec"><h3>${d.n}. ${d.title}</h3>${d.opts.map(([k, t, x]) => `<div class="opt ${S.decisions[d.n] === k ? 'is-on' : ''}" data-dec="${d.n}" data-opt="${k}" role="button" tabindex="0">${k === 'A' ? '<span class="rec">Выбрано 11.09</span>' : ''}<b>${k}. ${t}</b>${x}</div>`).join('')}<div class="why">${d.why}</div></div>`).join('');
+  document.getElementById('answerCode').textContent = DECISIONS.map(d => d.n + S.decisions[d.n]).join(' ');
+  document.querySelectorAll('[data-dec]').forEach(el => { const pick = () => { S.decisions[el.dataset.dec] = el.dataset.opt; paintDecisions(); }; el.onclick = pick; el.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); } }; });
+}
+
+/* ---------------- Отрисовка ---------------- */
+function paintSteps() {
+  document.getElementById('steps').innerHTML = STEPS.map((s, i) => `<button class="step-btn ${i === S.step ? 'is-on' : ''} ${S.done.has(i) ? 'is-done' : ''}" data-step="${i}"><span class="n">Шаг ${i + 1}</span><span class="t">${s.title}</span><span class="w">${s.short}</span></button>`).join('');
+  document.querySelectorAll('[data-step]').forEach(b => b.onclick = () => goStep(+b.dataset.step));
+}
+function paintPhases() {
+  const st = STEPS[S.step];
+  document.getElementById('phases').innerHTML = PHASES.map(([k, l]) => `<button class="ph-btn ${k === 'error' ? 'err' : ''} ${S.phase === k ? 'is-on' : ''}" data-ph="${k}">${l}</button>`).join('') +
+    (st.phone ? '' : `<span class="dev-switch"><button data-dev="desktop" class="${S.device === 'desktop' ? 'is-on' : ''}">Компьютер</button><button data-dev="phone" class="${S.device === 'phone' ? 'is-on' : ''}">Телефон</button></span>`);
+  document.querySelectorAll('[data-ph]').forEach(b => b.onclick = () => { S.auto = false; if (b.dataset.ph === 'error') S.promoErr = null; setPhase(b.dataset.ph); });
+  document.querySelectorAll('[data-dev]').forEach(b => b.onclick = () => { S.device = b.dataset.dev; render(); });
+  const vr = document.getElementById('variants');
+  vr.innerHTML = S.phase === 'error' ? st.errors.map(([l], i) => `<button class="var-btn ${S.variant === i ? 'is-on' : ''}" data-var="${i}">${l}</button>`).join('') : '';
+  document.querySelectorAll('[data-var]').forEach(b => b.onclick = () => { S.variant = +b.dataset.var; S.promoErr = null; render(); });
+}
+function paintExplain() {
+  const st = STEPS[S.step], label = PHASES.find(p => p[0] === S.phase)[1];
+  const note = S.phase === 'error' ? st.errors[S.variant][1] : st.notes[S.phase];
+  document.getElementById('explain').innerHTML = `<div class="ex-card">
+    <div class="stepno">Шаг ${S.step + 1} из ${STEPS.length}</div><h2>${st.title}</h2>
+    <dl><dt>👤 Кто действует</dt><dd>${st.who}</dd>
+    <dt>⚙️ Что происходит</dt><dd>${st.what}</dd>
+    <dt>🗄 Где хранится результат</dt><dd>${st.where}</dd>
+    <dt>🎭 Что здесь имитация</dt><dd class="mock">${st.mockText}</dd>
+    <dt>📎 Откуда требование</dt><dd class="rule">${st.rule}</dd></dl>
+    <div class="now ${S.phase === 'error' ? 'err' : ''}"><b>Сейчас · ${label}${S.phase === 'error' ? ' · ' + st.errors[S.variant][0] : ''}</b>${note}</div>
+    <div class="ex-nav"><button class="btn btn-ghost" data-go="${S.step - 1}" ${S.step === 0 ? 'disabled' : ''}>← Назад</button><button class="btn btn-buy" data-go="${S.step + 1}" ${S.step === STEPS.length - 1 ? 'disabled' : ''}>Следующий шаг →</button></div>
+  </div>`;
+  bindGo(document.getElementById('explain'));
+}
+function bindGo(root) {
+  root.querySelectorAll('[data-go]').forEach(b => b.onclick = e => { e.preventDefault(); goStep(+b.dataset.go); });
+  root.querySelectorAll('[data-phase]').forEach(b => b.onclick = e => { e.preventDefault(); S.auto = false; setPhase(b.dataset.phase); });
+}
+function render() {
+  const st = STEPS[S.step], dev = document.getElementById('device');
+  dev.className = 'device' + (st.phone || S.device === 'phone' ? ' is-phone' : '');
+  dev.innerHTML = st.render(S.phase, S.variant);
+  bindGo(dev);
+  dev.querySelectorAll('[data-add]').forEach(b => b.onclick = () => {
+    const id = b.dataset.add;
+    if (!S.cartTouched) { S.cart = {}; S.cartTouched = true; }
+    S.cart[id] = (S.cart[id] || 0) + 1;
+    const top = document.getElementById('sceneScroll') ? document.getElementById('sceneScroll').scrollTop : 0;
+    S.done.add(S.step); S.phase = 'result'; paintSteps(); paintPhases(); paintExplain(); dev.innerHTML = st.render('result', 0); bindGo(dev); rebindAdd(); st.bind('result');
+    const box = document.getElementById('sceneScroll'); if (box) box.scrollTop = top;
+  });
+  st.bind(S.phase);
+  paintSteps(); paintPhases(); paintExplain();
+}
+function rebindAdd() { document.querySelectorAll('#device [data-add]').forEach(b => b.onclick = () => { S.cart[b.dataset.add] = (S.cart[b.dataset.add] || 0) + 1; const box = document.getElementById('sceneScroll'); const top = box ? box.scrollTop : 0; render(); const nb = document.getElementById('sceneScroll'); if (nb) nb.scrollTop = top; }); }
+function setPhase(ph, keepVariant) {
+  clearTimeout(timer);
+  if (!keepVariant && ph !== S.phase) S.variant = 0;
+  S.phase = ph;
+  if (ph === 'result') S.done.add(S.step);
+  render();
+}
+function goStep(i) {
+  if (i < 0 || i >= STEPS.length) return;
+  clearTimeout(timer);
+  S.step = i; S.phase = 'before'; S.variant = 0; S.auto = false; S.promoErr = null;
+  if (i === 2 && !S.promo) S.promoInput = 'OSEN-R1';
+  if (i >= 3 && !S.promo) S.promo = { code: 'OSEN-R1', ...CODES['OSEN-R1'] };
+  render();
+  document.querySelector('.stage').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+document.getElementById('hlToggle').onchange = e => document.body.classList.toggle('hl', e.target.checked);
+paintDecisions();
+render();
+</script>
+</body>
+</html>
