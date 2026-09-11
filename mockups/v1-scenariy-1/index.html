@@ -561,6 +561,8 @@ const STEPS = [
   bind(ph) {
     const box = document.getElementById('sceneScroll'), scene = document.getElementById('scene');
     const upd = () => {
+      // Запоздалое событие прокрутки после смены шага: старой сцены уже нет в документе.
+      if (!box.isConnected || !scene.isConnected) return;
       const max = 1700 - box.clientHeight;
       S.p = Math.max(0, Math.min(1, box.scrollTop / max));
       scene.style.setProperty('--p', S.p.toFixed(3));
