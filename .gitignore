@@ -4,6 +4,12 @@
 .env.*.local
 *.pem
 *.key
+# Добавлено из claude-code-starter 1.1.0: любые .env.* кроме шаблонов, локальные MCP и ключи сервисов
+.env.*
+!.env.example
+!.env.sample
+.mcp.json
+credentials.json
 
 # Загрузки, хранилище, медиа и выгрузки с персональными данными
 /uploads
@@ -46,6 +52,8 @@ pnpm-debug.log*
 yarn-debug.log*
 
 # Тесты и кэши
+__pycache__/
+*.pyc
 .cache/
 coverage/
 .nyc_output/
@@ -63,3 +71,6 @@ retrospectives/*dry-run*
 retrospectives/*known-limitations*
 retrospectives/*pre-release*
 retrospectives/*ready-for-release*
+
+# Local private business context (does not untrack existing files)
+/.business/
