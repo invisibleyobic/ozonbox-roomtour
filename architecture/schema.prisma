@@ -1,2 +1,342 @@
-// Черновик
-// Здесь будет готовая схема базы, сгенерированная из 03-база-данных.md.
+// Схема базы OzoneBox, первая версия.
+// Сгенерирована из architecture/03-база-данных.md. Человеческое описание - там,
+// здесь только машинная запись. Меняем сначала описание, потом схему.
+//
+// Правила, которые видно прямо в схеме:
+//   - все суммы - целые копейки (правило 5 из 00-правила-проекта.md);
+//   - у заказа обязательная площадка источника, по умолчанию UNKNOWN (правило 1);
+//   - повторный вебхук не создаёт второй платёж: уникальность пары «транзакция + вид»;
+//   - удаление только мягкое: поле deletedAt, заказы и платежи не убираются вовсе.
+//
+// Ограничения-проверки (CHECK), частичная уникальность и начало счётчика номеров
+// Prisma выразить не умеет - они дописываются руками в первую миграцию.
+// Готовый текст - в конце этого файла, блок «SQL к первой миграции».
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────── Перечисления ───────────────────────────
+
+/// Площадка, с которой пришёл заказ. UNKNOWN - штатное значение, а не пустота:
+/// такой заказ виден в отчёте как проблема.
+enum SourcePlatform {
+  INSTAGRAM
+  TELEGRAM
+  VK
+  OZON
+  WB
+  YANDEX
+  SITE
+  UNKNOWN
+}
+
+/// Состояние заказа. Переходы только вперёд, порядок стережёт код.
+enum OrderStatus {
+  AWAITING_PAYMENT
+  PAID
+  SHIPPED
+}
+
+/// Бейдж на карточке товара. Это украшение, а не категория.
+enum ProductBadge {
+  HIT
+  BESTSELLER
+}
+
+/// Вид уведомления от CloudPayments:
+/// CHECK - проверка до списания, PAY - деньги списаны, FAIL - банк отказал.
+enum PaymentKind {
+  CHECK
+  PAY
+  FAIL
+}
+
+// ─────────────────────────── Каталог ───────────────────────────
+
+/// Товар: одна из 19 позиций каталога.
+model Product {
+  id           String        @id @default(cuid())
+  slug         String        @unique
+  name         String
+  sku          String
+  priceKopecks Int           @map("price_kopecks")
+  tagline      String
+  contents     String[]
+  benefits     String[]
+  badge        ProductBadge?
+
+  // Фото лежит в объектном хранилище, в базе только ключ и описание.
+  imageKey    String? @map("image_key")
+  imageAlt    String? @map("image_alt")
+  imageWidth  Int?    @map("image_width")
+  imageHeight Int?    @map("image_height")
+
+  sortOrder   Int       @default(100) @map("sort_order")
+  isPublished Boolean   @default(false) @map("is_published")
+  deletedAt   DateTime? @map("deleted_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  categories ProductCategory[]
+  orderItems OrderItem[]
+
+  // Витрина и фильтр «Хиты» ходят через частичные индексы -
+  // они создаются в первой миграции, см. блок в конце файла.
+  @@map("products")
+}
+
+/// Категория (линейка): лицо, волосы, тело, масло, наборы.
+model Category {
+  id        String    @id @default(cuid())
+  slug      String    @unique
+  title     String
+  sortOrder Int       @map("sort_order")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  products ProductCategory[]
+
+  @@index([sortOrder])
+  @@map("categories")
+}
+
+/// Связь «товар - линейка». У товара их 1..N.
+model ProductCategory {
+  productId  String @map("product_id")
+  categoryId String @map("category_id")
+
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  @@id([productId, categoryId])
+  @@index([categoryId])
+  @@map("product_categories")
+}
+
+// ─────────────────────────── Источник и доставка ───────────────────────────
+
+/// Промокод ролика. Он же запись об источнике: у ролика ровно один код.
+/// Сколько раз использован - не поле, а счёт оплаченных заказов с этим кодом.
+model PromoCode {
+  id              String         @id @default(cuid())
+  code            String         @unique
+  platform        SourcePlatform
+  videoTitle      String         @map("video_title")
+  videoDate       DateTime       @map("video_date") @db.Date
+  utmContent      String?        @map("utm_content")
+  discountPercent Int            @map("discount_percent")
+  usageLimit      Int            @map("usage_limit")
+  validUntil      DateTime       @map("valid_until") @db.Date
+  isDisabled      Boolean        @default(false) @map("is_disabled")
+  note            String?
+  deletedAt       DateTime?      @map("deleted_at")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  orders Order[]
+
+  @@index([platform, videoDate])
+  @@index([validUntil])
+  @@map("promo_codes")
+}
+
+/// Вариант доставки: семь тарифов корзины ozonbox.ru.
+model DeliveryOption {
+  id           String    @id @default(cuid())
+  slug         String    @unique
+  title        String
+  priceKopecks Int       @map("price_kopecks")
+  sortOrder    Int       @map("sort_order")
+  isEnabled    Boolean   @default(true) @map("is_enabled")
+  deletedAt    DateTime? @map("deleted_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  orders Order[]
+
+  @@map("delivery_options")
+}
+
+// ─────────────────────────── Заказы и деньги ───────────────────────────
+
+/// Заказ: деньги, контакты, источник. Главная запись проекта.
+model Order {
+  id     String      @id @default(cuid())
+  /// Номер для человека, счётчик базы начинается с 1000.
+  number Int         @unique @default(autoincrement())
+  status OrderStatus @default(AWAITING_PAYMENT)
+
+  // Контакты. Пусты только у заказа, где ПДн стёрты по требованию человека,
+  // и тогда пусты все четыре сразу - за этим следит CHECK в миграции.
+  customerName  String? @map("customer_name")
+  customerPhone String? @map("customer_phone")
+  customerEmail String? @map("customer_email")
+  addressLine   String? @map("address_line")
+
+  // Доставка: ссылка на тариф плюс снимок его названия и цены.
+  deliveryOptionId      String @map("delivery_option_id")
+  deliveryTitleSnapshot String @map("delivery_title_snapshot")
+  deliveryPriceKopecks  Int    @map("delivery_price_kopecks")
+
+  // Деньги, целые копейки. Итого = товары - выгода + доставка (CHECK в миграции).
+  itemsTotalKopecks Int @map("items_total_kopecks")
+  discountKopecks   Int @default(0) @map("discount_kopecks")
+  totalKopecks      Int @map("total_kopecks")
+
+  // Источник: разборно, а не одной строкой.
+  sourcePlatform          SourcePlatform @default(UNKNOWN) @map("source_platform")
+  utmSource               String?        @map("utm_source")
+  utmContent              String?        @map("utm_content")
+  sourceVideoTitle        String?        @map("source_video_title")
+  promoCodeId             String?        @map("promo_code_id")
+  promoCodeSnapshot       String?        @map("promo_code_snapshot")
+  discountPercentSnapshot Int?           @map("discount_percent_snapshot")
+
+  // Юридика: два согласия - два поля.
+  offerAcceptedAt   DateTime @map("offer_accepted_at")
+  privacyAcceptedAt DateTime @map("privacy_accepted_at")
+  marketingConsent  Boolean  @default(false) @map("marketing_consent")
+  legalDocsVersion  String   @map("legal_docs_version")
+
+  // Отметки времени: оплата, отгрузка, отправленные сообщения.
+  paidAt               DateTime? @map("paid_at")
+  shippedAt            DateTime? @map("shipped_at")
+  trackNumber          String?   @map("track_number")
+  telegramNotifiedAt   DateTime? @map("telegram_notified_at")
+  smsPaidSentAt        DateTime? @map("sms_paid_sent_at")
+  smsShippedSentAt     DateTime? @map("sms_shipped_sent_at")
+  personalDataErasedAt DateTime? @map("personal_data_erased_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  deliveryOption DeliveryOption @relation(fields: [deliveryOptionId], references: [id], onDelete: Restrict)
+  promoCode      PromoCode?     @relation(fields: [promoCodeId], references: [id], onDelete: Restrict)
+  items          OrderItem[]
+  payments       Payment[]
+
+  @@index([status, createdAt])
+  @@index([sourcePlatform, createdAt])
+  @@index([promoCodeId, status])
+  @@index([customerPhone])
+  @@map("orders")
+}
+
+/// Позиция заказа: что и почём куплено. Цена - снимок на момент заказа.
+model OrderItem {
+  id                  String @id @default(cuid())
+  orderId             String @map("order_id")
+  productId           String @map("product_id")
+  productNameSnapshot String @map("product_name_snapshot")
+  productSkuSnapshot  String @map("product_sku_snapshot")
+  unitPriceKopecks    Int    @map("unit_price_kopecks")
+  quantity            Int
+  lineTotalKopecks    Int    @map("line_total_kopecks")
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@unique([orderId, productId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+/// Уведомление от CloudPayments. Здесь живёт защита от двойного списания.
+/// Данные карты не хранятся никогда.
+model Payment {
+  id              String      @id @default(cuid())
+  orderId         String      @map("order_id")
+  cpTransactionId String      @map("cp_transaction_id")
+  kind            PaymentKind
+  amountKopecks   Int         @map("amount_kopecks")
+  reason          String?
+  receivedAt      DateTime    @map("received_at")
+  createdAt       DateTime    @default(now()) @map("created_at")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Restrict)
+
+  @@unique([cpTransactionId, kind])
+  @@index([orderId])
+  @@map("payments")
+}
+
+// ─────────────────────────── SQL к первой миграции ───────────────────────────
+//
+// Дописывается в файл первой миграции руками: Prisma эти вещи не выражает.
+// Каждая строка - правило из 03-база-данных.md, раздел 6.
+//
+// -- номер заказа для человека начинается с 1000
+// ALTER SEQUENCE orders_number_seq RESTART WITH 1000;
+//
+// -- деньги: неотрицательные, итог сходится, выгода не больше товаров и кратна рублю
+// ALTER TABLE orders ADD CONSTRAINT orders_money_non_negative
+//   CHECK (items_total_kopecks >= 0 AND discount_kopecks >= 0
+//          AND delivery_price_kopecks >= 0 AND total_kopecks >= 0);
+// ALTER TABLE orders ADD CONSTRAINT orders_total_matches
+//   CHECK (total_kopecks = items_total_kopecks - discount_kopecks + delivery_price_kopecks);
+// ALTER TABLE orders ADD CONSTRAINT orders_discount_fits
+//   CHECK (discount_kopecks <= items_total_kopecks);
+// ALTER TABLE orders ADD CONSTRAINT orders_discount_whole_rubles
+//   CHECK (discount_kopecks % 100 = 0);
+//
+// -- состояния согласованы с отметками времени
+// ALTER TABLE orders ADD CONSTRAINT orders_paid_has_time
+//   CHECK (status <> 'PAID' OR paid_at IS NOT NULL);
+// ALTER TABLE orders ADD CONSTRAINT orders_shipped_has_track
+//   CHECK (status <> 'SHIPPED' OR (shipped_at IS NOT NULL AND track_number IS NOT NULL AND paid_at IS NOT NULL));
+//
+// -- снимок промокода заполняется парой со ссылкой
+// ALTER TABLE orders ADD CONSTRAINT orders_promo_snapshot_pair
+//   CHECK ((promo_code_id IS NULL AND promo_code_snapshot IS NULL AND discount_percent_snapshot IS NULL)
+//       OR (promo_code_id IS NOT NULL AND promo_code_snapshot IS NOT NULL AND discount_percent_snapshot IS NOT NULL));
+//
+// -- персональные данные: либо все на месте, либо стёрты все разом
+// ALTER TABLE orders ADD CONSTRAINT orders_personal_data_all_or_nothing
+//   CHECK ((personal_data_erased_at IS NULL
+//           AND customer_name IS NOT NULL AND customer_phone IS NOT NULL
+//           AND customer_email IS NOT NULL AND address_line IS NOT NULL)
+//       OR (personal_data_erased_at IS NOT NULL
+//           AND customer_name IS NULL AND customer_phone IS NULL
+//           AND customer_email IS NULL AND address_line IS NULL));
+//
+// -- позиции заказа
+// ALTER TABLE order_items ADD CONSTRAINT order_items_quantity_positive CHECK (quantity > 0);
+// ALTER TABLE order_items ADD CONSTRAINT order_items_price_non_negative CHECK (unit_price_kopecks >= 0);
+// ALTER TABLE order_items ADD CONSTRAINT order_items_line_total_matches
+//   CHECK (line_total_kopecks = unit_price_kopecks * quantity);
+//
+// -- промокод: проценты в диапазоне, лимит больше нуля, код только заглавными
+// ALTER TABLE promo_codes ADD CONSTRAINT promo_codes_percent_range
+//   CHECK (discount_percent BETWEEN 1 AND 100);
+// ALTER TABLE promo_codes ADD CONSTRAINT promo_codes_limit_positive CHECK (usage_limit > 0);
+// ALTER TABLE promo_codes ADD CONSTRAINT promo_codes_uppercase
+//   CHECK (code = upper(code) AND code = btrim(code) AND length(code) > 0);
+//
+// -- товар и доставка: цены неотрицательные
+// ALTER TABLE products ADD CONSTRAINT products_price_non_negative CHECK (price_kopecks >= 0);
+// ALTER TABLE delivery_options ADD CONSTRAINT delivery_price_non_negative CHECK (price_kopecks >= 0);
+//
+// -- у заказа не больше одного успешного платежа
+// CREATE UNIQUE INDEX payments_one_success_per_order
+//   ON payments (order_id) WHERE kind = 'PAY';
+//
+// -- частичные индексы под самые частые запросы витрины и фоновых отправок
+// CREATE INDEX products_visible_idx
+//   ON products (sort_order) WHERE is_published AND deleted_at IS NULL;
+// CREATE INDEX delivery_options_visible_idx
+//   ON delivery_options (sort_order) WHERE is_enabled AND deleted_at IS NULL;
+// CREATE INDEX products_badge_idx
+//   ON products (badge) WHERE badge IS NOT NULL AND is_published AND deleted_at IS NULL;
+// CREATE INDEX orders_telegram_pending_idx
+//   ON orders (paid_at) WHERE paid_at IS NOT NULL AND telegram_notified_at IS NULL;
+// CREATE INDEX orders_sms_paid_pending_idx
+//   ON orders (paid_at) WHERE paid_at IS NOT NULL AND sms_paid_sent_at IS NULL;
+// CREATE INDEX orders_sms_shipped_pending_idx
+//   ON orders (shipped_at) WHERE shipped_at IS NOT NULL AND sms_shipped_sent_at IS NULL;
