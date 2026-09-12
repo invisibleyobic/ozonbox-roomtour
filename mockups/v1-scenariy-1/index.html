@@ -368,8 +368,8 @@ footer code { background: transparent; padding: 0; }
     <div class="decisions" id="decisions"></div>
     <div class="answer">Решение: <code id="answerCode"></code> · записано в <code>architecture/README.md</code></div>
     <div class="owner-q">
-      <div><b>Решает Рафаэль</b>Какую выгоду даёт код: процент, рубли или подарок. В макете стоит 10% для примера.</div>
-      <div><b>Решает Рафаэль</b>Кто и откуда отгружает заказы с сайта, тарифы для регионов вне центра. <small>(pitch.md, «Додумать» 3)</small></div>
+      <div><b>Решено 12.09.2026</b>Выгода по коду - 10% от текущей цены. Согласовано владельцем.</div>
+      <div><b>Выяснено на сайте 12.09</b>Отгружает сам магазин: после оплаты SMS, после отгрузки SMS с трек-номером. Тарифы - те же семь вариантов, что в корзине.</div>
       <div><b>Нужны документы</b>Оферта, отдельные согласия на данные и на рассылки, чеки. Без них первый рубль не принимаем.</div>
       <div><b>Нужен доступ</b>Имя тестового поддомена и доступ к DNS. В макете стоит условное <code>new.ozonbox.ru</code>.</div>
     </div>
@@ -502,7 +502,7 @@ const STEPS = [
     } else if (ph === 'wait') {
       body = `${reel(true)}${me}<div class="sys-note">Доставлено · отвечает человек или ChatPlace</div><div class="typing"><i></i><i></i><i></i></div>`;
     } else if (ph === 'result') {
-      body = `${reel(true)}${me}<div class="bubble them">Спасибо, что с нами! Ваш код: <b>OSEN-R1</b><br>Выгода на сайте - 10% ${warn('пример')}. Действует до 31.10.<br><a href="#" data-go="1">new.ozonbox.ru/?promo=OSEN-R1&amp;utm_source=instagram&amp;utm_content=reels-1209</a><span class="meta">12.09 · 21:31</span></div>`;
+      body = `${reel(true)}${me}<div class="bubble them">Спасибо, что с нами! Ваш код: <b>OSEN-R1</b><br>Выгода на сайте - 10%. Действует до 31.10.<br><a href="#" data-go="1">new.ozonbox.ru/?promo=OSEN-R1&amp;utm_source=instagram&amp;utm_content=reels-1209</a><span class="meta">12.09 · 21:31</span></div>`;
       foot = `<button class="btn btn-buy" style="flex:1" data-go="1">Открыть ссылку → шаг 2</button>`;
     } else {
       body = v === 0
@@ -542,7 +542,7 @@ const STEPS = [
   ],
   render(ph, v) {
     const noCode = ph === 'error' && v === 1, noVideo = (ph === 'error' && v === 0) || ph === 'wait';
-    const strip = noCode ? '' : `<div class="promo-strip" data-new="Новое: код из ссылки">Код <b>OSEN-R1</b> сохранён и применится в корзине · выгода 10% ${warn('пример')}</div>`;
+    const strip = noCode ? '' : `<div class="promo-strip" data-new="Новое: код из ссылки">Код <b>OSEN-R1</b> сохранён и применится в корзине · выгода 10%</div>`;
     const leaves = [[12, 18, 26, 30], [70, 12, 18, 120], [84, 58, 22, 200], [30, 70, 14, 80], [55, 35, 12, 160]].map(([x, y, s, r]) => `<i class="leaf" style="left:${x}%;top:${y}%;width:${s}px;height:${s}px;transform:rotate(${r}deg) translateY(calc(var(--p) * 120px))"></i>`).join('');
     const cards = SCENE_IDS.map((id, i) => { const p = BY_ID[id]; return `<div class="sp" data-i="${i}"><img src="assets/${p.img}" alt=""><div class="nm">${esc(p.name)}</div><div class="pr">${rub(p.price)}</div><button class="btn btn-buy btn-sm" data-add="${id}">В корзину</button></div>`; }).join('');
     const url = noCode ? '<b>new.ozonbox.ru</b>/' : SITE_URL;
@@ -594,7 +594,7 @@ const STEPS = [
   who: 'Покупательница и сервер сайта, который проверяет код.',
   what: 'Код из ссылки уже стоит в поле. По кнопке «Применить» сервер проверяет, есть ли такой код, не истёк ли срок и не исчерпан ли лимит. В ответ сайт получает выгоду и канал.',
   where: 'Корзина хранится в браузере. Проверка только читает таблицу промокодов: пока заказа нет, в базу ничего не пишется.',
-  mockText: 'Сервера нет, проверку изображает таймер в браузере. Работают коды OSEN-R1 (успех), OSEN-OLD (срок вышел) и OSEN-R0 (лимит). Выгода 10% - пример: размер решает Рафаэль, считается в процентах от текущей цены. Промокодов на сайте сегодня нет вовсе, есть только постоянная зачёркнутая цена - от 7% до 46%, в среднем 31%.',
+  mockText: 'Сервера нет, проверку изображает таймер в браузере. Работают коды OSEN-R1 (успех), OSEN-OLD (срок вышел) и OSEN-R0 (лимит). Выгода 10% от текущей цены - решено 12.09.2026. Промокодов на сайте сегодня нет вовсе, есть только постоянная зачёркнутая цена - от 7% до 46%, в среднем 31%.',
   rule: 'idea/mvp.md, п. 3-4 · 00-правила, «Всегда» 1: у каждого заказа есть источник.',
   notes: {
     before: 'Корзина открыта. Код подставлен из ссылки, но ещё не проверен.',
@@ -614,7 +614,7 @@ const STEPS = [
     const errText = { notfound: 'Такого кода нет. Проверьте буквы или оформите заказ без выгоды.', expired: 'Срок действия кода закончился. Можно оформить заказ без выгоды.', limit: 'Код этого ролика уже использован нужное число раз. Можно оформить заказ без выгоды.', network: 'Не получилось проверить код: нет связи с сервером.', word: 'ОСЕНЬ - это кодовое слово для директа. Промокод пришёл в ответе, например OSEN-R1.' };
     let msg = '';
     if (ph === 'wait') msg = `<div class="msg info"><span class="spinner"></span>&nbsp; Проверяем код…</div>`;
-    else if (S.promo && ph === 'result') msg = `<div class="msg ok">Код <b>${S.promo.code}</b> применён: выгода ${S.promo.pct}% ${warn('пример')}<br><span class="src-badge" data-new="Новое: источник заказа">Источник заказа: ${S.promo.channel} · ${S.promo.campaign}</span></div>`;
+    else if (S.promo && ph === 'result') msg = `<div class="msg ok">Код <b>${S.promo.code}</b> применён: выгода ${S.promo.pct}%<br><span class="src-badge" data-new="Новое: источник заказа">Источник заказа: ${S.promo.channel} · ${S.promo.campaign}</span></div>`;
     else if (ph === 'error' && S.promoErr) msg = `<div class="msg err">${errText[S.promoErr]} ${S.promoErr === 'network' ? '<button class="btn btn-ghost btn-sm" id="retry" style="margin-left:6px">Повторить</button>' : ''}</div><div class="msg info">Источник всё равно запишется: из ссылки (utm_content=reels-1209) или <code>unknown</code> - такой заказ попадёт в отчёт как проблема.</div>`;
     const list = items.length ? items.map(i => `<div class="line-item"><img src="assets/${i.img}" alt=""><div><div class="nm">${esc(i.name)}</div><div class="qty">${i.q} шт. · ${rub(i.price)}</div></div><div class="price">${rub(i.price * i.q)}</div></div>`).join('') : '<p style="color:var(--ink-mute)">Корзина пуста - добавьте товар на шаге 2.</p>';
     return browser('<b>new.ozonbox.ru</b>/cart', `${siteHead(false)}<div class="panel"><h3>Корзина</h3>${list}
