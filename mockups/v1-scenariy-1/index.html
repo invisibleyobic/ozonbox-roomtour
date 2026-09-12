@@ -330,7 +330,8 @@ footer code { background: transparent; padding: 0; }
           <li>Человек видит пост и идёт на сайт Tilda или на Wildberries и Ozon. <small>(idea/pitch.md)</small></li>
           <li>Сайт на Tilda почти не продаёт, на главной до сих пор заглушка шаблона.</li>
           <li>Заказ приходит, но никто не знает, какой канал его привёл. Решения принимаются наугад.</li>
-          <li>На всех товарах постоянные «зачёркнутые» цены, в текстах «лечит» и «результат за 21 день». Это риск по закону о рекламе. <small>(.business: pricing, content)</small></li>
+          <li>На всех товарах постоянная «зачёркнутая» цена - от 7% до 46%, в среднем 31%. В текстах «лечит», «результат за 21 день», «рекомендована беременным». Это риск по закону о рекламе.</li>
+          <li>В подвале есть кнопки «Оферта», «Скидка», «Условия доставки», но они ни на что не ведут. Условия доставки видно только в корзине.</li>
         </ul>
       </div>
       <div class="cmp-card will">
@@ -380,7 +381,7 @@ footer code { background: transparent; padding: 0; }
     <h2>Не входит в первую версию</h2>
     <p>Из списка «Потом» в <code>idea/mvp.md</code>. В макете этого нет специально.</p>
     <div class="later">
-      <span>Свой бот в директе</span><span>Еженедельный отчёт по каналам (сцена 2)</span><span>Смена сезона одной кнопкой (сцена 3)</span><span>Зима, весна, лето</span><span>SEO-многостраничник и переезд домена</span><span>Автопостинг</span><span>Сезонные карточки WB и Ozon через API</span><span>Админка</span><span>Сайт про озонотерапию</span>
+      <span>Свой бот в директе</span><span>Еженедельный отчёт по каналам (сцена 2)</span><span>Смена сезона одной кнопкой (сцена 3)</span><span>Зима, весна, лето</span><span>SEO-многостраничник и переезд домена</span><span>Автопостинг</span><span>Сезонные карточки WB и Ozon через API</span><span>Админка</span><span>Сайт про озонотерапию</span><span>Оптовые заявки, обратный звонок, чаты WhatsApp и Viber - остаются как сейчас</span>
     </div>
   </div>
 </section>
@@ -423,7 +424,17 @@ const CODES = {
   'OSEN-OLD': { err: 'expired' },
   'OSEN-R0': { err: 'limit' }
 };
-const DELIVERY = { pvz: { label: 'СДЭК, пункт выдачи', price: 450 }, door: { label: 'Курьер до двери', price: 550 } };
+/* Доставка - ровно как в корзине ozonbox.ru на 12.09.2026. Отдельного тарифа для России
+   вне центральной части на сайте сейчас нет, поэтому его нет и здесь. */
+const DELIVERY = {
+  pvz: { label: 'Центральная часть РФ, пункт СДЭК', price: 450 },
+  door: { label: 'Центральная часть РФ, курьер до двери', price: 550 },
+  kz: { label: 'Казахстан, пункт выдачи СДЭК', price: 600 },
+  by_pvz: { label: 'Белоруссия, пункт выдачи СДЭК', price: 450 },
+  by_door: { label: 'Белоруссия, СДЭК до двери', price: 550 },
+  intl1: { label: 'За пределы РФ, 1 набор', price: 1500 },
+  intl2: { label: 'За пределы РФ, от 2 наборов', price: 3000 }
+};
 const LOGO = '<svg viewBox="0 0 31 32" fill="none" aria-hidden="true"><path d="M24.37 17.65c3.57.31 6.32 3.42 6.32 7.16V32h-6.9c-3.58 0-6.57-2.87-6.87-6.59-.35-4.43 3.2-8.13 7.45-7.76Z" fill="#3C6DF0"/><path d="M4.81 16c0-2.86 0-4.71.12-6.12.1-1.35.28-1.85.4-2.1a4.8 4.8 0 0 1 2.14-2.23c.23-.12.71-.3 2-.42 1.36-.11 3.13-.11 5.88-.11s4.52 0 5.87.11c1.3.12 1.78.3 2.01.42a4.8 4.8 0 0 1 2.14 2.23c.12.25.3.75.4 2.1.08 1.06.1 2.38.11 4.19a10.6 10.6 0 0 1 4.82 2.47V16c0-5.56 0-8.35-1.03-10.47A10.1 10.1 0 0 0 25.4 1.07C23.35 0 20.68 0 15.35 0S7.34 0 5.3 1.07a10.1 10.1 0 0 0-4.27 4.46C0 7.65 0 10.44 0 16s0 8.35 1.03 10.47a10.1 10.1 0 0 0 4.27 4.46C7.34 32 10.01 32 15.35 32h.52a11.5 11.5 0 0 1-2.37-5.02c-1.74 0-3-.03-4.02-.12-1.3-.11-1.78-.29-2.01-.42a4.8 4.8 0 0 1-2.14-2.22c-.12-.25-.3-.75-.4-2.1C4.82 20.7 4.81 18.86 4.81 16Z" fill="#0d1b2e"/></svg>';
 
 const PHASES = [['before','До действия'],['input','Ввод'],['wait','Ожидание'],['result','Результат'],['error','Ошибка']];
@@ -583,7 +594,7 @@ const STEPS = [
   who: 'Покупательница и сервер сайта, который проверяет код.',
   what: 'Код из ссылки уже стоит в поле. По кнопке «Применить» сервер проверяет, есть ли такой код, не истёк ли срок и не исчерпан ли лимит. В ответ сайт получает выгоду и канал.',
   where: 'Корзина хранится в браузере. Проверка только читает таблицу промокодов: пока заказа нет, в базу ничего не пишется.',
-  mockText: 'Сервера нет, проверку изображает таймер в браузере. Работают коды OSEN-R1 (успех), OSEN-OLD (срок вышел) и OSEN-R0 (лимит). Выгода 10% - пример, размер решает Рафаэль.',
+  mockText: 'Сервера нет, проверку изображает таймер в браузере. Работают коды OSEN-R1 (успех), OSEN-OLD (срок вышел) и OSEN-R0 (лимит). Выгода 10% - пример: размер решает Рафаэль, считается в процентах от текущей цены. Промокодов на сайте сегодня нет вовсе, есть только постоянная зачёркнутая цена - от 7% до 46%, в среднем 31%.',
   rule: 'idea/mvp.md, п. 3-4 · 00-правила, «Всегда» 1: у каждого заказа есть источник.',
   notes: {
     before: 'Корзина открыта. Код подставлен из ссылки, но ещё не проверен.',
@@ -643,7 +654,7 @@ const STEPS = [
   who: 'Покупательница и сервер сайта, который создаёт заказ.',
   what: 'Покупательница заполняет контакты и доставку и отмечает каждое согласие отдельно. По кнопке сервер создаёт заказ со статусом «ждёт оплаты» и сразу записывает его источник.',
   where: 'Заказ и личные данные (имя, телефон, email, адрес) хранятся в базе PostgreSQL на сервере в РФ (152-ФЗ). В Telegram, в логи и в запросы к ИИ личные данные не попадают.',
-  mockText: 'Заказ не создаётся, номер №1042 выдуман. Оферты и текстов согласий пока нет: без них первый рубль не принимаем (принцип 5). Тарифы доставки взяты с текущего сайта, для регионов вне центра их нет.',
+  mockText: 'Заказ не создаётся, номер №1042 выдуман. Оферты и текстов согласий пока нет: без них первый рубль не принимаем (принцип 5). Варианты доставки - ровно те, что сейчас в корзине ozonbox.ru. Отдельного тарифа для России вне центральной части на сайте нет: так это работает сегодня.',
   rule: '00-правила, «Запрещено»: ПДн вне РФ, оплата без оферты и раздельных согласий · .business/company/legal.md.',
   notes: {
     before: 'Пустая форма. Согласие на рассылки - отдельная галочка, по умолчанию не отмечена.',
@@ -656,16 +667,16 @@ const STEPS = [
     ['Нет документов', 'Пока нет оферты и текстов согласий, кнопка оплаты выключена - так в первой версии и будет до их появления.']
   ],
   render(ph, v) {
-    const t = totals(), f = S.form, e = ph === 'error' && v === 0 ? { phone: 'Номер телефона: 11 цифр, например +7 910 000-00-00', pd: true } : S.formErr;
+    const t = totals(), f = S.form, e = ph === 'error' && v === 0 ? { phone: 'Телефон указан с ошибкой', pd: true } : S.formErr;
     const blocked = ph === 'error' && v === 1;
     const fld = (k, l, ph2, type = 'text') => `<div class="field"><label for="f_${k}">${l}</label><input class="inp ${e[k] ? 'bad' : ''}" id="f_${k}" data-f="${k}" type="${type}" value="${esc(f[k])}" placeholder="${ph2}" autocomplete="off">${e[k] ? `<div class="hint">${e[k]}</div>` : ''}</div>`;
     let over = '';
     if (ph === 'wait') over = `<div class="veil"><div class="paywin" style="border-style:solid;border-color:#fff;text-align:center"><span class="spinner"></span><h4>Создаём заказ…</h4><p style="margin:0;color:var(--ink-soft);font-size:13.5px">Статус «ждёт оплаты», источник OSEN-R1</p></div></div>`;
     if (ph === 'result') over = `<div class="veil"><div class="paywin" style="border-style:solid;border-color:#fff"><span class="pill wait">ждёт оплаты</span><h4>Заказ №1042 создан</h4><p style="margin:0 0 12px;color:var(--ink-soft);font-size:13.5px">Источник: OSEN-R1 · Instagram · Reels 12.09. Следующий шаг - окно оплаты.</p><button class="btn btn-buy" style="width:100%" data-go="4">К оплате → шаг 5</button></div></div>`;
     return browser('<b>new.ozonbox.ru</b>/checkout', `${siteHead(false)}${over}<div class="panel"><h3>Оформление</h3>
-      <div class="form-grid">${fld('name', 'Имя', 'Анна')}${fld('phone', 'Телефон', '+7 …', 'tel')}${fld('email', 'Email для чека', 'anna@example.ru', 'email')}${fld('city', 'Город и пункт выдачи', 'Нижний Новгород, …')}</div>
-      <div class="sec-title">Доставка ${warn('тарифы для регионов вне центра не указаны')}</div>
-      ${Object.entries(DELIVERY).map(([k, d]) => `<label class="choice"><input type="radio" name="dl" value="${k}" ${S.delivery === k ? 'checked' : ''}><span><b>${d.label}</b> · ${rub(d.price)}<small>Центральная часть РФ, тариф с текущего сайта</small></span></label>`).join('')}
+      <div class="form-grid">${fld('name', 'Имя', 'Анна')}${fld('phone', 'Телефон', '+7 …', 'tel')}${fld('email', 'Email для чека', 'anna@example.ru', 'email')}${fld('city', 'Адрес доставки', 'Нижний Новгород, ПВЗ СДЭК, индекс 603000')}</div>
+      <div class="sec-title">Доставка - те же варианты, что в корзине сегодня</div>
+      ${Object.entries(DELIVERY).map(([k, d]) => `<label class="choice"><input type="radio" name="dl" value="${k}" ${S.delivery === k ? 'checked' : ''}><span><b>${d.label}</b> · ${rub(d.price)}<small>Тариф из корзины ozonbox.ru</small></span></label>`).join('')}
       <div class="sec-title" data-new="Изменено: согласия раздельно">Согласия - каждое отдельно</div>
       <label class="choice ${e.offer ? 'bad' : ''}"><input type="checkbox" data-c="offer" ${S.consent.offer ? 'checked' : ''}><span>Принимаю условия <a href="#" onclick="return false">публичной оферты</a> ${warn('документа ещё нет')}<small>Обязательно</small></span></label>
       <label class="choice ${e.pd ? 'bad' : ''}"><input type="checkbox" data-c="pd" ${S.consent.pd ? 'checked' : ''}><span>Даю согласие на обработку персональных данных<small>Обязательно · отдельный документ · данные хранятся в РФ</small></span></label>
@@ -680,13 +691,13 @@ const STEPS = [
     document.querySelectorAll('[data-f]').forEach(i => i.oninput = () => { S.form[i.dataset.f] = i.value; if (S.phase === 'before') { S.phase = 'input'; paintPhases(); paintExplain(); } });
     document.querySelectorAll('input[name=dl]').forEach(r => r.onchange = () => { S.delivery = r.value; render(); });
     document.querySelectorAll('[data-c]').forEach(c => c.onchange = () => { S.consent[c.dataset.c] = c.checked; });
-    const fill = document.getElementById('fillDemo'); if (fill) fill.onclick = () => { S.form = { name: 'Анна', phone: '+7 910 000-00-00', email: 'anna@example.ru', city: 'Нижний Новгород, ПВЗ на Большой Покровской' }; S.consent = { offer: true, pd: true, news: false }; S.formErr = {}; setPhase('input'); };
+    const fill = document.getElementById('fillDemo'); if (fill) fill.onclick = () => { S.form = { name: 'Анна', phone: '+7 910 000-00-00', email: 'anna@example.ru', city: 'Нижний Новгород, ПВЗ СДЭК на Большой Покровской, 603000' }; S.consent = { offer: true, pd: true, news: false }; S.formErr = {}; setPhase('input'); };
     const go = document.getElementById('toPay'); if (go) go.onclick = () => {
       const err = {};
-      if (!S.form.name.trim()) err.name = 'Как к вам обращаться?';
-      if (S.form.phone.replace(/\D/g, '').length !== 11) err.phone = 'Номер телефона: 11 цифр, например +7 910 000-00-00';
-      if (!/.+@.+\..+/.test(S.form.email)) err.email = 'Нужен email: на него придёт чек';
-      if (!S.form.city.trim()) err.city = 'Куда доставить?';
+      if (!S.form.name.trim()) err.name = 'Имя указано не верно';
+      if (S.form.phone.replace(/\D/g, '').length !== 11) err.phone = 'Телефон указан с ошибкой';
+      if (!/.+@.+\..+/.test(S.form.email)) err.email = 'E-mail указан с ошибкой';
+      if (!S.form.city.trim()) err.city = 'Обязательное поле: адрес и индекс';
       if (!S.consent.offer) err.offer = true;
       if (!S.consent.pd) err.pd = true;
       S.formErr = err;
@@ -718,7 +729,7 @@ const STEPS = [
     const t = totals();
     const base = `<div class="panel"><h3>Оплата заказа №1042</h3><div class="totals"><div class="row"><span>Товары со скидкой по коду</span><span>${rub(t.sub - t.disc)}</span></div><div class="row"><span>${DELIVERY[S.delivery].label}</span><span>${rub(t.del)}</span></div><div class="row sum"><span>К оплате</span><span>${rub(t.sum)}</span></div></div>
       <button class="btn btn-buy" style="width:100%;margin-top:14px;padding:14px" data-phase="input">Оплатить ${rub(t.sum)}</button>
-      <p style="font-size:12.5px;color:var(--ink-mute);margin:10px 0 0">Карты МИР, Сбер, Альфа, Т-Банк - как на текущем сайте. Оплата через CloudPayments ${warn('сверить с договором')}</p></div>`;
+      <p style="font-size:12.5px;color:var(--ink-mute);margin:10px 0 0">Карты МИР, Сбер, Альфа, Т-Банк - как на текущем сайте. Оплата через CloudPayments - он уже подключён к текущему сайту</p></div>`;
     const win = inner => `<div class="veil"><div class="paywin"><div style="display:flex;justify-content:space-between;align-items:center">${mock('Имитация окна CloudPayments')}</div>${inner}</div></div>`;
     let over = '';
     if (ph === 'input') over = win(`<h4>OzoneBox · заказ №1042</h4><div class="amt">${rub(t.sum)}</div><div class="nocard">Здесь в настоящем окне будут поля карты. Их видит только CloudPayments, сайт OzoneBox номер карты не получает. В макете полей нет специально.</div><div class="sim"><button class="btn btn-brand" data-pay="ok">Смоделировать: оплата прошла</button><button class="btn btn-ghost" data-pay="declined">Смоделировать: банк отклонил</button><button class="btn btn-ghost" data-pay="closed">Смоделировать: закрыть окно</button></div>`);
@@ -770,7 +781,7 @@ const STEPS = [
     else if (ph === 'error' && v === 1) tg = '<div class="sys-note">Telegram не ответил · повтор через 1 мин</div>';
     else tg = `<div class="bubble them bot">${esc(msg)}<span class="meta">21:47</span></div>${ph === 'error' && v === 0 ? '<div class="sys-note">Повторное уведомление 21:48 · заказ уже оплачен · сообщение не отправлено</div>' : ''}`;
     const buyer = paid
-      ? `<div class="thanks"><span class="pill paid">оплачен</span><div class="big">Спасибо! Заказ №1042 оплачен</div><p style="margin:0;color:var(--ink-soft);font-size:13.5px">Чек придёт на anna@example.ru. Дальше - доставка: ${warn('кто и когда отгружает, не решено')}</p></div>`
+      ? `<div class="thanks"><span class="pill paid">оплачен</span><div class="big">Спасибо! Заказ №1042 оплачен</div><p style="margin:0;color:var(--ink-soft);font-size:13.5px">Чек придёт на anna@example.ru. Дальше как сейчас: магазин отгружает сам, после оплаты приходит SMS, а после отгрузки - SMS с трек-номером</p></div>`
       : `<div class="thanks"><span class="pill wait">ждёт оплаты</span><div class="big">Проверяем оплату…</div>${ph === 'input' ? '<button class="btn btn-brand" id="hook" style="margin-top:8px">Пришло уведомление от CloudPayments</button>' : ''}${ph === 'wait' ? '<p style="font-size:13.5px;color:var(--ink-soft)"><span class="spinner"></span>&nbsp; сервер обрабатывает уведомление</p>' : ''}</div>`;
     return `<div class="result-grid">
       <div><div class="col-title">Покупательница видит</div>${buyer}</div>
