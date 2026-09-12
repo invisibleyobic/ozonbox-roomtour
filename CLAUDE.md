@@ -51,7 +51,7 @@ ozonbox-roomtour/
 
 ## Стек
 
-Next.js + TypeScript, GSAP + ScrollTrigger (Club-плагины ScrollSmoother и SplitText - локально из `C:/Users/user/Downloads/gsap-public/`, не с CDN), видео-скраббинг вместо 3D. Окончательный выбор - `architecture/05-стек.md`.
+Next.js + TypeScript, GSAP + ScrollTrigger (GSAP с 2025 года бесплатен целиком, включая бывшие Club-плагины ScrollSmoother и SplitText; берём локально из `C:/Users/user/Downloads/gsap-public/`, не с CDN), видео-скраббинг вместо 3D. Окончательный выбор - `architecture/05-стек.md`.
 
 ## Ключевые принципы работы
 
