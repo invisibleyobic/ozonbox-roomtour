@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Каталог — OzoneBox</title>
+<meta name="description" content="Лечебная озоновая косметика OzoneBox: кремы, наборы, средства для волос и тела.">
+<link rel="stylesheet" href="css/catalog.css">
+</head>
+<body>
+
+<div class="ambient">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<header class="site-head" id="head">
+  <div class="wrap head-inner">
+    <a class="logo" href="https://ozonbox.ru">
+      <svg class="logo-mark" viewBox="0 0 31 32" fill="none" aria-hidden="true">
+        <path d="M24.3714 17.6468C27.9454 17.9573 30.6944 21.0721 30.6944 24.811V32H23.7987C20.2123 32 17.2246 29.134 16.9268 25.408C16.5726 20.9777 20.1218 17.2776 24.3714 17.6468Z" fill="#3C6DF0"/>
+        <path d="M4.81481 16C4.81481 13.1364 4.81848 11.2875 4.92767 9.87966C5.0324 8.52957 5.21025 8.02811 5.32892 7.78234C5.79335 6.82046 6.54219 6.03976 7.46483 5.55558C7.70057 5.43186 8.18157 5.24644 9.47658 5.13727C10.827 5.02343 12.6005 5.01961 15.3472 5.01961C18.094 5.01961 19.8675 5.02343 21.2179 5.13727C22.5129 5.24644 22.9939 5.43187 23.2296 5.55558C24.1523 6.03976 24.9011 6.82046 25.3655 7.78234C25.4842 8.02811 25.6621 8.52957 25.7668 9.87966C25.8492 10.9432 25.8715 12.2586 25.8775 14.073C27.704 14.4553 29.351 15.3266 30.6944 16.546C30.6944 16.3671 30.6944 16.185 30.6944 16C30.6944 10.4367 30.6944 7.65503 29.6662 5.52547C28.7374 3.60168 27.2397 2.0403 25.3944 1.07194C23.3517 0 20.6835 0 15.3472 0C10.0109 0 7.34271 0 5.30004 1.07194C3.45473 2.0403 1.95706 3.60168 1.02821 5.52547C0 7.65503 0 10.4367 0 16C0 21.5633 0 24.345 1.02821 26.4745C1.95706 28.3983 3.45473 29.9597 5.30004 30.9281C7.34271 32 10.0109 32 15.3472 32C15.5247 32 15.6992 32 15.8709 31.9999C14.7013 30.5995 13.8656 28.8824 13.4988 26.9781C11.7584 26.9719 10.4967 26.9487 9.47658 26.8627C8.18157 26.7536 7.70057 26.5682 7.46483 26.4444C6.54219 25.9602 5.79334 25.1795 5.32892 24.2177C5.21025 23.9719 5.0324 23.4704 4.92767 22.1203C4.81848 20.7125 4.81481 18.8636 4.81481 16Z" fill="#0d1b2e"/>
+      </svg>
+      <span class="logo-word">Ozone<span>Box</span></span>
+    </a>
+    <div class="head-meta">
+      <a class="head-phone" href="tel:+79101369031">+7 910 136-90-31</a>
+    </div>
+  </div>
+</header>
+
+<div id="smooth-wrapper">
+<div id="smooth-content">
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-eyebrow" data-anim="eyebrow"><i></i>Эксклюзивно в России</div>
+    <h1 data-anim="title">Озоновая косметика,<br>которая <em>лечит</em></h1>
+    <p class="hero-lead" data-anim="lead">Активный кислород проникает в клетку и запускает восстановление изнутри. Без гормонов, антибиотиков и привыкания — результат виден за двадцать один день.</p>
+    <div class="hero-stats" data-anim="stats">
+      <div class="stat">
+        <div class="stat-num" data-count="20">0</div>
+        <div class="stat-lab">лет лаборатории</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" data-count="42">0</div>
+        <div class="stat-lab">страны экспорта</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" data-count="300">0</div>
+        <div class="stat-lab">дилеров по миру</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="toolbar" id="toolbar">
+  <div class="wrap toolbar-inner">
+    <div class="filters" id="filters"></div>
+    <div class="sort-wrap">
+      <label for="sort">Сортировка</label>
+      <select class="sort" id="sort">
+        <option value="default">По популярности</option>
+        <option value="asc">Сначала дешевле</option>
+        <option value="desc">Сначала дороже</option>
+        <option value="off">Больше скидка</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+  <div class="grid" id="grid"></div>
+</main>
+
+</div>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalName">
+  <div class="modal-veil" data-close></div>
+  <div class="modal-box">
+    <button class="modal-close" data-close aria-label="Закрыть">✕</button>
+    <div class="modal-media" id="modalMedia"></div>
+    <div class="modal-side">
+      <div class="modal-sku" id="modalSku"></div>
+      <h2 class="modal-name" id="modalName"></h2>
+      <p class="modal-tag" id="modalTag"></p>
+      <div class="modal-block">
+        <h4>Что входит</h4>
+        <ul class="modal-list" id="modalContents"></ul>
+      </div>
+      <div class="modal-block">
+        <h4>Почему работает</h4>
+        <ul class="modal-list is-check" id="modalBenefits"></ul>
+      </div>
+      <div class="modal-buy">
+        <div>
+          <div class="price" id="modalPrice"></div>
+        </div>
+        <a class="btn btn-buy" id="modalLink" href="#" target="_blank" rel="noopener">Заказать</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal cmp-modal" id="cmpModal" role="dialog" aria-modal="true" aria-labelledby="cmpTitle">
+  <div class="modal-veil" data-cmp-close></div>
+  <div class="modal-box">
+    <button class="modal-close" data-cmp-close aria-label="Закрыть">✕</button>
+    <h2 class="cmp-title" id="cmpTitle">Сравнение</h2>
+    <div class="cmp-table" id="cmpTable"></div>
+  </div>
+</div>
+
+<div class="cmp-bar" id="cmpBar">
+  <span class="cmp-count" id="cmpCount">Выбрано 0</span>
+  <div class="cmp-thumbs" id="cmpThumbs"></div>
+  <button class="cmp-go" id="cmpGo">Сравнить</button>
+  <button class="cmp-clear" id="cmpClear">Сбросить</button>
+</div>
+
+<script src="js/vendor/gsap.min.js"></script>
+<script src="js/vendor/ScrollTrigger.min.js"></script>
+<script src="js/vendor/ScrollSmoother.min.js"></script>
+<script src="js/vendor/SplitText.min.js"></script>
+<script src="js/vendor/CustomEase.min.js"></script>
+<script src="js/vendor/Draggable.min.js"></script>
+<script src="js/vendor/InertiaPlugin.min.js"></script>
+<script src="js/vendor/Flip.min.js"></script>
+<script src="js/data.js"></script>
+<script src="js/catalog.js"></script>
+</body>
+</html>

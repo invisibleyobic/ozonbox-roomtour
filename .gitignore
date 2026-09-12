@@ -74,3 +74,11 @@ retrospectives/*ready-for-release*
 
 # Local private business context (does not untrack existing files)
 /.business/
+
+# Club-плагины GSAP - платная лицензия GreenSock, в репозиторий не кладём.
+# Лежат локально: C:/Users/user/Downloads/gsap-public/ и prototypes/*/js/vendor/
+**/js/vendor/
+
+# Собираемый предпросмотр прототипа (картинки в base64). Пересобрать:
+# python prototypes/2026-09-09-katalog/build-preview.py
+prototypes/*/preview.html
