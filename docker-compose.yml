@@ -1,0 +1,19 @@
+# Локальная база PostgreSQL для разработки (шаг 8 чертежа).
+# В проде - управляемый PostgreSQL у провайдера (05-стек.md), этот контейнер только для машины разработчика.
+# Пароля нет намеренно: POSTGRES_HOST_AUTH_METHOD=trust, порт торчит только на 127.0.0.1 -
+# то есть достучаться может только тот же компьютер, придумывать и хранить пароль незачем.
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - ozonbox_db_data:/var/lib/postgresql/data
+
+volumes:
+  ozonbox_db_data:
