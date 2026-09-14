@@ -9,7 +9,10 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:generate": "prisma generate"
+    "prisma:generate": "prisma generate",
+    "seed:categories": "tsx scripts/ops/seedReferenceData.ts",
+    "seed:products": "tsx scripts/ops/seedProducts.ts",
+    "seed": "npm run seed:categories && npm run seed:products"
   },
   "dependencies": {
     "@prisma/client": "^6.3.1",
@@ -25,6 +28,7 @@
     "eslint": "^9.18.0",
     "eslint-config-next": "^15.1.6",
     "prisma": "^6.3.1",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.3"
   }
 }

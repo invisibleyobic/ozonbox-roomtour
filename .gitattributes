@@ -2,4 +2,5 @@
 # Иначе при core.autocrlf=true Windows превратит их в CRLF, контрольная сумма блока
 # не совпадёт, и повторный запуск установщика откажется работать.
 CLAUDE.md text eol=lf
+AGENTS.md text eol=lf
 .starter/workflow.md text eol=lf
