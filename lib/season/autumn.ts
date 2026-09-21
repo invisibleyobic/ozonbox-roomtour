@@ -10,8 +10,7 @@ export const autumnSeason: SeasonConfig = {
   code: "autumn",
   kicker: "Сезон · осень",
   title: "Осенью кожа реагирует на холод и отопление",
-  description:
-    "Мы собрали уход под это время года. Текст - HTML поверх сцены: его можно править и индексировать.",
+  description: "Мы собрали уход под это время года.",
   productSlugs: ["super-trio", "stop-akne", "ochischenie", "ozodermik-3"],
   media: {
     videoKey: null,

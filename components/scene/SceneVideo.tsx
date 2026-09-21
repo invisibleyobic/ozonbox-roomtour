@@ -2,8 +2,7 @@
 
 import { useRef } from "react";
 import Script from "next/script";
-import type { Product } from "@prisma/client";
-import { publicUrl } from "@/lib/storage";
+import type { ProductView } from "@/lib/catalog/view";
 
 declare global {
   interface Window {
@@ -25,7 +24,7 @@ interface SceneVideoProps {
   kicker: string;
   title: string;
   description: string;
-  products: Product[];
+  products: ProductView[];
   videoUrl: string;
   posterUrl?: string;
 }
@@ -90,12 +89,12 @@ export function SceneVideo({ kicker, title, description, products, videoUrl, pos
           <div className="scene-products">
             {products.map((product) => (
               <div key={product.id} className="scene-product is-in">
-                {product.imageKey && (
+                {product.imageUrl && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={publicUrl(product.imageKey)} alt={product.imageAlt ?? product.name} loading="lazy" />
+                  <img src={product.imageUrl} alt={product.imageAlt} loading="lazy" />
                 )}
                 <p className="scene-product__name">{product.name}</p>
-                <p className="scene-product__price">{(product.priceKopecks / 100).toLocaleString("ru-RU")} ₽</p>
+                <p className="scene-product__price">{product.priceLabel}</p>
               </div>
             ))}
           </div>

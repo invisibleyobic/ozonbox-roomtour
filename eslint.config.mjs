@@ -14,6 +14,29 @@ const eslintConfig = [
   {
     ignores: ["vendor/**", "public/**", ".next/**"],
   },
+  {
+    // 08a-автоматические-проверки.md, 2.2: цены не пишем в коде экрана - они
+    // приходят из базы через formatPrice.
+    files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
+    ignores: ["**/*.test.{ts,tsx}"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "Literal[value=/\\d\\s*₽/]",
+          message: "Цена в коде экрана: берите сумму из базы через formatPrice.",
+        },
+        {
+          selector: "JSXText[value=/\\d\\s*₽/]",
+          message: "Цена в коде экрана: берите сумму из базы через formatPrice.",
+        },
+        {
+          selector: "TemplateElement[value.raw=/\\d\\s*₽/]",
+          message: "Цена в коде экрана: берите сумму из базы через formatPrice.",
+        },
+      ],
+    },
+  },
 ];
 
 export default eslintConfig;

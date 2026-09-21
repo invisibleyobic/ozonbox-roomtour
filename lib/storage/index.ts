@@ -1,3 +1,4 @@
+import "server-only";
 import { env } from "@/config/env";
 
 // Прослойка файлового хранилища (шаг 6 и 8 чертежа). Пока S3 не подключён

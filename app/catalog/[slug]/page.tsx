@@ -1,12 +1,8 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getProductBySlug } from "@/lib/catalog";
+import { BADGE_LABEL, formatPrice } from "@/lib/catalog/format";
 import { publicUrl } from "@/lib/storage";
-
-const BADGE_LABEL: Record<string, string> = {
-  HIT: "Хит",
-  BESTSELLER: "Бестселлер",
-};
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
@@ -36,7 +32,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
       <div className="product-page__body">
         <h1>{product.name}</h1>
         <p className="product-page__tagline">{product.tagline}</p>
-        <p className="product-page__price">{(product.priceKopecks / 100).toLocaleString("ru-RU")} ₽</p>
+        <p className="product-page__price">{formatPrice(product.priceKopecks)}</p>
         <p className="product-page__sku">Артикул {product.sku}</p>
 
         <h2>Состав</h2>

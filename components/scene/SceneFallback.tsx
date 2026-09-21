@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { Product } from "@prisma/client";
-import { publicUrl } from "@/lib/storage";
+import type { ProductView } from "@/lib/catalog/view";
 
 interface SceneFallbackProps {
   kicker: string;
   title: string;
   description: string;
-  products: Product[];
+  products: ProductView[];
 }
 
 // Заглушка вместо видео (00-правила-проекта.md, правило 3): CSS-фон и фото
@@ -66,12 +65,12 @@ export function SceneFallback({ kicker, title, description, products }: SceneFal
                 cardRefs.current[i] = el;
               }}
             >
-              {product.imageKey && (
+              {product.imageUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={publicUrl(product.imageKey)} alt={product.imageAlt ?? product.name} loading="lazy" />
+                <img src={product.imageUrl} alt={product.imageAlt} loading="lazy" />
               )}
               <p className="scene-product__name">{product.name}</p>
-              <p className="scene-product__price">{(product.priceKopecks / 100).toLocaleString("ru-RU")} ₽</p>
+              <p className="scene-product__price">{product.priceLabel}</p>
             </div>
           ))}
         </div>

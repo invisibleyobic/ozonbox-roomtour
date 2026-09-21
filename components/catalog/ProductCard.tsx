@@ -1,25 +1,19 @@
 import Link from "next/link";
-import type { Product } from "@prisma/client";
-import { publicUrl } from "@/lib/storage";
+import type { ProductView } from "@/lib/catalog/view";
 
-const BADGE_LABEL: Record<string, string> = {
-  HIT: "Хит",
-  BESTSELLER: "Бестселлер",
-};
-
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({ product }: { product: ProductView }) {
   return (
     <Link href={`/catalog/${product.slug}`} className="product-card">
       <div className="product-card__media">
-        {product.imageKey && (
+        {product.imageUrl && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={publicUrl(product.imageKey)} alt={product.imageAlt ?? product.name} loading="lazy" />
+          <img src={product.imageUrl} alt={product.imageAlt} loading="lazy" />
         )}
-        {product.badge && <span className="product-card__badge">{BADGE_LABEL[product.badge]}</span>}
+        {product.badgeLabel && <span className="product-card__badge">{product.badgeLabel}</span>}
       </div>
       <div className="product-card__body">
         <p className="product-card__name">{product.name}</p>
-        <p className="product-card__price">{(product.priceKopecks / 100).toLocaleString("ru-RU")} ₽</p>
+        <p className="product-card__price">{product.priceLabel}</p>
       </div>
     </Link>
   );
