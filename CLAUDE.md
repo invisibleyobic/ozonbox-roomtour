@@ -51,7 +51,7 @@ ozonbox-roomtour/
 | `git push` - только с подтверждением | `ask` в `.claude/settings.json` |
 | Цена не вписана в код экрана (правило 2) | `npm run lint`: правило `no-restricted-syntax` в `eslint.config.mjs` для `app/` и `components/` |
 | Клиентский код не тянет серверные модули и `env` | тест `components/clientBoundary.test.ts` + `import "server-only"` в `config/env.ts` и `lib/storage` |
-| Формат денег, состав сезона | `npm test` (vitest): `lib/catalog/format.test.ts`, `lib/season/season.test.ts` |
+| Формат денег, состав сезона, выгода по коду, исходы промокода, cookie источника | `npm test` (vitest): `lib/catalog/format.test.ts`, `lib/season/season.test.ts`, `lib/orders/money.test.ts`, `lib/promoCodes/evaluate.test.ts`, `lib/attribution/attribution.test.ts` |
 | Всё вместе, перед push | `npm run lint && npm run typecheck && npm test && npm run build`, затем `bash scripts/security-audit.sh` |
 
 Остальные правила из `00-правила-проекта.md` (источник у заказа, копейки в заказах, бюджет скорости, медицинские обещания) пока проверяются только чтением: их проверки появятся вместе с кодом корзины и заказа (`architecture/08a-автоматические-проверки.md`). Hook - это страховка от ошибок агента, а не граница безопасности: скрипт на другом языке его обойдёт.

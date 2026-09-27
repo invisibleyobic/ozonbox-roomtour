@@ -9,6 +9,7 @@ import type { SeasonConfig } from "./index";
 export const autumnSeason: SeasonConfig = {
   code: "autumn",
   kicker: "Сезон · осень",
+  navLabel: "Осень",
   title: "Осенью кожа реагирует на холод и отопление",
   description: "Мы собрали уход под это время года.",
   productSlugs: ["super-trio", "stop-akne", "ochischenie", "ozodermik-3"],
