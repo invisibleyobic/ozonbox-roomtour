@@ -13,7 +13,8 @@
     "prisma:generate": "prisma generate",
     "seed:categories": "tsx scripts/ops/seedReferenceData.ts",
     "seed:products": "tsx scripts/ops/seedProducts.ts",
-    "seed": "npm run seed:categories && npm run seed:products"
+    "seed": "npm run seed:categories && npm run seed:products",
+    "seed:dev-promo": "tsx scripts/ops/seedDevPromoCodes.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.3.1",
