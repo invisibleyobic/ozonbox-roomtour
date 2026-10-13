@@ -33,6 +33,12 @@
 | Задеплоить проект (Vercel / Amvera / Railway / свой сервер) | [`launch/02-deploy.md`](./launch/02-deploy.md) |
 | Подключить приём платежей (Stripe / YooKassa / CloudPayments) | [`launch/03-payments.md`](./launch/03-payments.md) |
 
+### Codex (параллельная работа)
+
+| Задача | Промпт |
+|---|---|
+| Главная OzoneBox - та же задача для Codex, сравнить с Claude | [`codex/01-glavnaya-sorevnovanie.md`](./codex/01-glavnaya-sorevnovanie.md) |
+
 ### Methodology (методологические приёмы)
 
 | Задача | Промпт |
