@@ -3,6 +3,8 @@ import { autumnSeason } from "./autumn";
 export interface SeasonConfig {
   code: string;
   kicker: string;
+  /** Короткое имя сезона для шапки. */
+  navLabel: string;
   title: string;
   description: string;
   /** Slug'и товаров сцены, в порядке показа (02-сущности.md, 3.3). */

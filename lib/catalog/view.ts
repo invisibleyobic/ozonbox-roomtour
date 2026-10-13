@@ -10,6 +10,7 @@ export interface ProductView {
   id: string;
   slug: string;
   name: string;
+  priceKopecks: number;
   priceLabel: string;
   imageUrl: string | null;
   imageAlt: string;
@@ -21,6 +22,7 @@ export function toProductView(product: Product): ProductView {
     id: product.id,
     slug: product.slug,
     name: product.name,
+    priceKopecks: product.priceKopecks,
     priceLabel: formatPrice(product.priceKopecks),
     imageUrl: product.imageKey ? publicUrl(product.imageKey) : null,
     imageAlt: product.imageAlt ?? product.name,

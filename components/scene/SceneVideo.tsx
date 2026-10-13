@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import Script from "next/script";
-import type { ProductView } from "@/lib/catalog/view";
+import { SceneContent, type SceneTextProps } from "./SceneContent";
 
 declare global {
   interface Window {
@@ -20,11 +20,7 @@ declare global {
   }
 }
 
-interface SceneVideoProps {
-  kicker: string;
-  title: string;
-  description: string;
-  products: ProductView[];
+interface SceneVideoProps extends SceneTextProps {
   videoUrl: string;
   posterUrl?: string;
 }
@@ -35,7 +31,7 @@ interface SceneVideoProps {
 // постер видео, текст и карточки уже на месте. Рендерится только когда в
 // конфиге сезона указан videoKey - без него страница показывает
 // SceneFallback, и код этого компонента не выполняется вовсе.
-export function SceneVideo({ kicker, title, description, products, videoUrl, posterUrl }: SceneVideoProps) {
+export function SceneVideo({ videoUrl, posterUrl, ...content }: SceneVideoProps) {
   const trackRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const readyRef = useRef(false);
@@ -71,6 +67,7 @@ export function SceneVideo({ kicker, title, description, products, videoUrl, pos
       <Script src="/vendor/gsap/gsap.min.js" strategy="lazyOnload" onLoad={initScrub} />
       <Script src="/vendor/gsap/ScrollTrigger.min.js" strategy="lazyOnload" onLoad={initScrub} />
       <div className="scene-track" ref={trackRef}>
+        <span id="podborka" className="scene-anchor" />
         <div className="scene scene--video">
           <video
             ref={videoRef}
@@ -81,23 +78,7 @@ export function SceneVideo({ kicker, title, description, products, videoUrl, pos
             playsInline
             preload="metadata"
           />
-          <div className="scene-text">
-            <p className="scene-text__kicker">{kicker}</p>
-            <h1 className="scene-text__title">{title}</h1>
-            <p className="scene-text__description">{description}</p>
-          </div>
-          <div className="scene-products">
-            {products.map((product) => (
-              <div key={product.id} className="scene-product is-in">
-                {product.imageUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={product.imageUrl} alt={product.imageAlt} loading="lazy" />
-                )}
-                <p className="scene-product__name">{product.name}</p>
-                <p className="scene-product__price">{product.priceLabel}</p>
-              </div>
-            ))}
-          </div>
+          <SceneContent {...content} revealed />
         </div>
       </div>
     </>

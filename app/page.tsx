@@ -10,6 +10,14 @@ import { ProductCard } from "@/components/catalog/ProductCard";
 // без этого страница застыла бы на момент сборки и не видела бы правок цены.
 export const revalidate = 60;
 
+function pluralProducts(count: number): string {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  if (mod10 === 1 && mod100 !== 11) return "товар";
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return "товара";
+  return "товаров";
+}
+
 export default async function Home() {
   const season = getCurrentSeason();
   const products = (await getPublishedProducts()).map(toProductView);
@@ -39,9 +47,13 @@ export default async function Home() {
         />
       )}
 
-      <section className="catalog">
-        <h2 className="catalog__title">Весь каталог</h2>
-        <p className="catalog__subtitle">{products.length} товаров</p>
+      <section className="catalog" id="katalog" aria-labelledby="katalog-title">
+        <div className="catalog__head">
+          <h2 className="catalog__title" id="katalog-title">
+            Весь каталог
+          </h2>
+          <p className="catalog__subtitle">{products.length} {pluralProducts(products.length)}</p>
+        </div>
         <div className="catalog__grid">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
