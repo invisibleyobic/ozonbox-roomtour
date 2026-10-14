@@ -32,7 +32,7 @@
 
 ## Промпты (Soul 2.0, 3:4, 2k)
 
-Общий хвост для всех (добавляется в конец): *Medium format camera with 100mm portrait lens at f/8, tack-sharp focus across the face, luxury beauty magazine cover quality, high-end retouching that keeps real skin texture with visible natural pores, rule of thirds.*
+Общий хвост для всех (добавляется в конец): *Medium format camera with 100mm portrait lens at f/8, tack-sharp focus across the face, luxury skincare campaign photograph, clean frame with only the person and the seamless paper backdrop, plain background edges, high-end retouching that keeps real skin texture with visible natural pores, rule of thirds.*
 
 - **M01.** Beauty editorial portrait of a nineteen-year-old woman with light freckles across her nose, messy honey-blonde hair in a loose clip, head turned three-quarters to the left with a playful half-smile, against a seamless vivid acid lime-green paper backdrop. Fresh young skin with real texture and a couple of faint marks on the chin, bare shoulders, natural brows, tinted lip balm. Large softbox key light front-left, white bounce fill, crisp rim light on the hair. Palette of 70% acid lime green, 25% warm skin tones, 5% honey blonde.
 - **M02.** Clean grooming portrait of a twenty-year-old man with short tousled dark-blond hair and a light stubble, three-quarter view looking slightly past the camera, relaxed confident expression, against a seamless pale cool-grey backdrop. Real young skin texture with a few faint marks on the jawline, plain white crew-neck t-shirt. Large softbox key light from the right, soft fill, subtle rim light. Palette of 65% pale cool grey, 25% warm skin tones, 10% white cotton.
@@ -49,5 +49,7 @@
 - **M13.** Tender gift-moment portrait of a couple in their early thirties, the woman resting her cheek on the man's shoulder, both smiling softly with eyes toward the camera, head-and-shoulders crop, plain white tees, against a seamless vivid acid lime-green backdrop. Real skin textures on both faces, natural hair. Large softbox key light from the front, white fill, rim light separating them from the background. Palette of 65% acid lime green, 25% warm skin tones, 10% white cotton.
 
 ## Статус
+
+- **14.10.2026, 03:15 UTC:** льготный период пропустил 5 кадров из 26: M01, M02, M04 (два варианта), M06. Лица хорошие, но из-за слов «magazine cover» нейросеть дорисовала логотип VOGUE, штрихкоды и мусорный текст. **Чужой товарный знак - такие кадры целиком не публикуем.** Обрезали верх и низ кадра (1536×1260 → webp 1200), промпты исправлены: вместо «обложки» - «campaign photograph, clean frame». Апскейл до 4K не делали: генерации ограничены.
 
 - [ ] 13.10.2026: генерация не запустилась. Higgsfield отвечает «дневной лимит льготного периода»: подписка в льготном периоде (обычно это значит, что не прошёл платёж). Кредитов на балансе 2114, генерация стоит около 0,12 кредита за кадр.
